@@ -17,17 +17,13 @@ To use notebooks from GitHub:
 - Paste the URL of the GitHub repository or enter the username to browse repositories.
 - Choose the desired notebook file (`.ipynb`) from the repository.
 
-## Step 3: Cloning GitHub Repository
 
-To clone an entire repository:
-```python
-!git clone https://github.com/username/repository.git
 
-## Step 4: Accessing Data from the Repository
+## Step 3: Accessing Data from the Repository
 After cloning, access files using:
 import pandas as pd
 data = pd.read_csv('/content/repository/datafile.csv')
-## Step 5: Saving Your Notebook
+## Step 4: Saving Your Notebook
 To save changes back to GitHub:
 
 Choose File > Save a copy in GitHub.
