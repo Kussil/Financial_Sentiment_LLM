@@ -51,10 +51,6 @@ default_tickers = ['BP', 'COP', 'CVX', 'CXO', 'DVN', 'EOG', 'EQNR', 'HES', 'MPC'
 # Dropdown for tickers with blank default and single selection
 ticker = st.selectbox('Select a stock ticker', options=[''] + default_tickers)
 
-# Date inputs with default dates from 2019 to the current date
-start_date = st.date_input('Start date', datetime(2019, 1, 1))
-end_date = st.date_input('End date', datetime.today())
-
 # Use Streamlit session state to remember selected ticker and plot state
 if 'selected_ticker' not in st.session_state:
     st.session_state.selected_ticker = None
@@ -67,6 +63,10 @@ if st.button('Show Plot'):
     st.session_state.selected_ticker = ticker
     st.session_state.plot_shown = True
 
+# Fixed dates
+start_date = datetime(2019, 1, 1)
+end_date = datetime.today()
+
 if st.session_state.plot_shown and st.session_state.selected_ticker:
     data = fetch_data(st.session_state.selected_ticker, start_date, end_date)
     if not data.empty:
@@ -74,19 +74,20 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
         st.plotly_chart(fig)
 
         # Add a date selector for the article
-        selected_date = st.date_input('Select a date within the range', start_date)
+        selected_date = st.date_input('Select a date within the range', start_date, key='selected_date')
 
         # When a date is selected, find the closest date and display the article text
         if selected_date:
             closest_date_row = find_closest_date(sec_df, st.session_state.selected_ticker, selected_date)
             if closest_date_row is not None:
                 st.session_state.article_text = closest_date_row['Article Text']
-                st.write(f"Article for {st.session_state.selected_ticker} closest to {selected_date}:")
-                st.write(f"Form: {closest_date_row['Article Headline']}")
-                st.write(f"Date: {closest_date_row['Date'].strftime('%Y-%m-%d')}")
-                st.write("Article text loaded. You can now enter a query.")
+                st.markdown(
+                    f"**Article found:** "
+                    f"{closest_date_row['Article Headline']} "
+                    f"({closest_date_row['Date'].strftime('%Y-%m-%d')})"
+                )
             else:
-                st.write(f"No articles found for {st.session_state.selected_ticker} before {selected_date}")
+                st.write(f"No articles found before {selected_date}")
                 st.session_state.article_text = ""
     else:
         st.write(f'No data found for {st.session_state.selected_ticker}')
