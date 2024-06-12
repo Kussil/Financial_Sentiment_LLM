@@ -8,11 +8,32 @@ import google.generativeai as genai
 
 # Function to fetch stock data
 def fetch_data(ticker, start, end):
+    """
+    Fetch stock data for a given ticker within a specified date range.
+
+    Parameters:
+    ticker (str): The stock ticker symbol.
+    start (str): The start date in 'YYYY-MM-DD' format.
+    end (str): The end date in 'YYYY-MM-DD' format.
+
+    Returns:
+    pandas.DataFrame: DataFrame containing stock data with date as index.
+    """
     stock_data = yf.download(ticker, start=start, end=end)
     return stock_data
 
 # Function to plot stock data
 def plot_data(stock_data, ticker):
+    """
+    Plot stock data for a given ticker.
+
+    Parameters:
+    stock_data (pandas.DataFrame): DataFrame containing stock data with date as index.
+    ticker (str): The stock ticker symbol.
+
+    Returns:
+    plotly.graph_objs._figure.Figure: Plotly figure object with the stock price plot.
+    """
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name=ticker))
     fig.update_layout(title=f'Stock Prices for {ticker}',
@@ -22,6 +43,17 @@ def plot_data(stock_data, ticker):
 
 # Function to find closest date before the selected date
 def find_closest_date(sec_df, ticker, selected_date):
+    """
+    Find the closest date before the selected date for a given ticker in the SEC filings DataFrame.
+
+    Parameters:
+    sec_df (pandas.DataFrame): DataFrame containing SEC filings data with 'Date' and 'Ticker' columns.
+    ticker (str): The stock ticker symbol.
+    selected_date (str): The selected date in 'YYYY-MM-DD' format.
+
+    Returns:
+    pandas.Series: Row from the DataFrame corresponding to the closest date before the selected date.
+    """
     sec_df['Date'] = pd.to_datetime(sec_df['Date'])
     selected_datetime = pd.to_datetime(selected_date)
     ticker_data = sec_df[sec_df['Ticker'] == ticker]
@@ -33,6 +65,17 @@ def find_closest_date(sec_df, ticker, selected_date):
 
 # Function to generate summary using LLM
 def generate_summary(query, text, model):
+    """
+    Generate a summary using a language model based on a query and text.
+
+    Parameters:
+    query (str): The query to be answered by the language model.
+    text (str): The text to be summarized, typically from an SEC filing.
+    model: The language model used to generate the summary.
+
+    Returns:
+    str: The generated summary response from the language model.
+    """
     query_context = f"This text is from an SEC Filing:\n\n{text}\n\n Please answer the following"
     total_query = query_context + query
     response = model.generate_content(total_query)
@@ -63,10 +106,11 @@ if st.button('Show Plot'):
     st.session_state.selected_ticker = ticker
     st.session_state.plot_shown = True
 
-# Fixed dates
+# Fixed dates for the plot
 start_date = datetime(2019, 1, 1)
 end_date = datetime.today()
 
+# Fetch and plot stock data if a plot is shown and a ticker is selected
 if st.session_state.plot_shown and st.session_state.selected_ticker:
     data = fetch_data(st.session_state.selected_ticker, start_date, end_date)
     if not data.empty:
@@ -93,7 +137,7 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
         st.write(f'No data found for {st.session_state.selected_ticker}')
         st.session_state.article_text = ""
 
-# LLM Model setup
+# LLM Model setup.  (API Key needs to be in your environment variables)
 key = 'GOOGLE_API_KEY'
 GOOGLE_API_KEY = os.getenv(key)
 genai.configure(api_key=GOOGLE_API_KEY)
