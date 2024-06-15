@@ -2,6 +2,7 @@
 ![Logo](09_Miscellaneous/Project_logo_ReadMe.png)
 ## Table of Contents
 1. [Description](#description)
+2. [Running](#using-github-repositories-in-google-colab)
 ## Description
 This project aims to analyze the dynamics of stock prices for around 20 industry-related competitors, such as Chevron, Exxon, and Shell. The analysis is based on various factors, including news sentiment, financial reports, and other documents. The project combines fundamental and technical analysis methodologies to predict stock price movements and understand market behavior.
 
@@ -12,7 +13,7 @@ The specific goals include:
 - Delivering a Comprehensive Analysis Report: Producing detailed reports summarizing the findings.
 
 
-# Using GitHub Repositories in Google Colab
+## Using GitHub Repositories in Google Colab
 
 This guide explains how to link and use GitHub repositories in Google Colab, enabling you to run notebooks and access files directly from GitHub.
 
