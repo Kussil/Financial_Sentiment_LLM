@@ -12,6 +12,7 @@ template_rev_2 = "Your template here"  # Define your template here
 
 # Define and Load Model and Tokenizer
 def initialize_model():
+    from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer, pipeline
     global model_4bit, tokenizer
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
