@@ -1,3 +1,9 @@
+import torch
+from transformers import BitsAndBytesConfig
+from langchain.llms.huggingface_pipeline import HuggingFacePipeline
+from langchain import PromptTemplate, LLMChain
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
 def initialize_model():
 
 # Define Quantization
