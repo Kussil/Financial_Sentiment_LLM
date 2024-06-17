@@ -4,10 +4,11 @@ from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain import PromptTemplate, LLMChain
 
-# Global variables to store model and tokenizer
+# Global variables to store model, tokenizer, and llm
 model_4bit = None
 tokenizer = None
 llm = None
+template_rev_2 = "Your template here"  # Define your template here
 
 # Define and Load Model and Tokenizer
 def initialize_model():
@@ -22,9 +23,6 @@ def initialize_model():
         device_map="auto",
         quantization_config=quantization_config)
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
-
-# Initialize the model
-initialize_model()
 
 # Create Hugging Face Pipeline
 def initialize_llm():
@@ -43,9 +41,6 @@ def initialize_llm():
         pad_token_id=tokenizer.eos_token_id)
     llm = HuggingFacePipeline(pipeline=pipeline_inst)
 
-# Initialize the LLM
-initialize_llm()
-
 # Function to generate response
 def generate_response(article):
     prompt = PromptTemplate(template=template_rev_2, input_variables=["article"])
@@ -63,4 +58,6 @@ def processArticle(article):
 # Example usage
 if __name__ == "__main__":
     article = "Sample article text for testing."
+    initialize_model()
+    initialize_llm()
     processArticle(article)
