@@ -117,7 +117,7 @@ def generate_summary(query, text, model):
 st.title('Stock Price Analyzer')
 
 # Load CSV into a DataFrame
-csv_path = '02_Cleaned_Data\SEC_Filings.csv'
+csv_path = os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv') #modified path to reflect the correct location
 sec_df = pd.read_csv(csv_path)
 
 # Default tickers
