@@ -8,7 +8,39 @@ from langchain import PromptTemplate, LLMChain
 model_4bit = None
 tokenizer = None
 llm = None
-template_rev_2 = "Your template here"  # Define your template here
+template_rev_2 = """<s>Summarize the following article and classify it into the categories with sentiment (Positive, Neutral, Negative, N/A if not applicable). Use the format provided in the example.
+
+Categories:
+- Finance: Financial performance, earnings, investments
+- Production: Oil and gas production levels and outputs
+- Reserves / Exploration / Acquisitions / Mergers / Divestments: Activities related to reserves, exploration, acquisitions, mergers, divestments
+- Environment / Regulatory / Geopolitics: Environmental impact, regulations, geopolitical issues
+- Alternative Energy / Lower Carbon: Initiatives in alternative energy and lower carbon emissions
+- Oil Price / Natural Gas Price / Gasoline Price: Pricing of oil, natural gas, gasoline
+
+Example:
+Article: "The company reported a 20% increase in earnings, driven by higher oil prices and increased production levels. They also announced a new exploration project in the North Sea."
+
+Output:
+- Finance == Positive
+- Production == Positive
+- Reserves / Exploration / Acquisitions / Mergers / Divestments == Positive
+- Environment / Regulatory / Geopolitics == Neutral
+- Alternative Energy / Lower Carbon == N/A
+- Oil Price / Natural Gas Price / Gasoline Price == Positive
+
+Article: {article}
+
+Your Output:
+- Finance == [Sentiment]
+- Production == [Sentiment]
+- Reserves / Exploration / Acquisitions / Mergers / Divestments == [Sentiment]
+- Environment / Regulatory / Geopolitics == [Sentiment]
+- Alternative Energy / Lower Carbon == [Sentiment]
+- Oil Price / Natural Gas Price / Gasoline Price == [Sentiment]
+</s>
+
+""" 
 
 # Define and Load Model and Tokenizer
 def initialize_model():
