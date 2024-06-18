@@ -8,37 +8,37 @@ from langchain import PromptTemplate, LLMChain
 model_4bit = None
 tokenizer = None
 llm = None
-template_rev_2 = """<s>Summarize the following article and classify it into the categories with sentiment (Positive, Neutral, Negative, N/A if not applicable). Use the format provided in the example.
+template_rev_2 = """<s>Given the text, analyze the content and perform sentiment analysis across multiple predefined categories.
+
+Sentiment options:
+  - Positive
+  - Neutral
+  - Negative
 
 Categories:
-- Finance: Financial performance, earnings, investments
-- Production: Oil and gas production levels and outputs
-- Reserves / Exploration / Acquisitions / Mergers / Divestments: Activities related to reserves, exploration, acquisitions, mergers, divestments
-- Environment / Regulatory / Geopolitics: Environmental impact, regulations, geopolitical issues
-- Alternative Energy / Lower Carbon: Initiatives in alternative energy and lower carbon emissions
-- Oil Price / Natural Gas Price / Gasoline Price: Pricing of oil, natural gas, gasoline
+  - Finance
+  - Production
+  - Reserves / Exploration / Acquisitions / Mergers / Divestments
+  - Environment / Regulatory / Geopolitics
+  - Alternative Energy / Lower Carbon
+  - Oil Price / Natural Gas Price / Gasoline Price
 
-Example:
-Article: "The company reported a 20% increase in earnings, driven by higher oil prices and increased production levels. They also announced a new exploration project in the North Sea."
+Each category should be evaluated and given a sentiment output derived from the text.
+If a category is not mentioned or relevant based on the text content, mark it as 'Neutral'.
 
-Output:
-- Finance == Positive
-- Production == Positive
-- Reserves / Exploration / Acquisitions / Mergers / Divestments == Positive
-- Environment / Regulatory / Geopolitics == Neutral
-- Alternative Energy / Lower Carbon == N/A
-- Oil Price / Natural Gas Price / Gasoline Price == Positive
+The text is below:
+{article_text}
 
-Article: {article}
+Remember to summarize your final answers in the following format exactly:
+- Category - Sentiment
+- Category - Sentiment
+- Category - Sentiment
+- Category - Sentiment
+- Category - Sentiment
+- Category - Sentiment
 
-Your Output:
-- Finance == [Sentiment]
-- Production == [Sentiment]
-- Reserves / Exploration / Acquisitions / Mergers / Divestments == [Sentiment]
-- Environment / Regulatory / Geopolitics == [Sentiment]
-- Alternative Energy / Lower Carbon == [Sentiment]
-- Oil Price / Natural Gas Price / Gasoline Price == [Sentiment]
-</s>
+Make sure to use plain text and stick to the given categories and sentiment options.
+DO NOT bold or bullet the output summary.
 
 """ 
 
