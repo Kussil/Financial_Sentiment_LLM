@@ -2,7 +2,8 @@
 import torch
 from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer, pipeline
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
-from langchain import PromptTemplate, LLMChain
+from langchain import PromptTemplate
+from langchain.schema.runnable import RunnableSequence
 
 # Global variables to store model, tokenizer, and llm
 model_4bit = None
@@ -44,7 +45,6 @@ DO NOT bold or bullet the output summary.
 
 # Define and Load Model and Tokenizer
 def initialize_model():
-    from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer, pipeline
     global model_4bit, tokenizer
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -75,22 +75,15 @@ def initialize_llm():
     llm = HuggingFacePipeline(pipeline=pipeline_inst)
 
 # Function to generate response
-def generate_response(article):
-    prompt = PromptTemplate(template=template_rev_2, input_variables=["article"])
-    llm_chain = LLMChain(prompt=prompt, llm=llm)
-    response = llm_chain.run({"article": article})
-    return response
+def generate_response(article_text):
+    prompt = PromptTemplate(template=template_rev_2, input_variables=["article_text"])
+    sequence = RunnableSequence([prompt, llm])
+    response = sequence.invoke({"article_text": article_text})
+    return response['generated_text']
 
 # Function to process the article
-def processArticle(article):
-    full_response = generate_response(article)
+def processArticle(article_text):
+    full_response = generate_response(article_text)
     split_response = full_response.split("</s>", 1)
     final_response = split_response[1]
-    print(final_response)
-
-# Example usage
-if __name__ == "__main__":
-    article = "Sample article text for testing."
-    initialize_model()
-    initialize_llm()
-    processArticle(article)
+    return final_response
