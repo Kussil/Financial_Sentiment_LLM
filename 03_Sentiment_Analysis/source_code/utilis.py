@@ -104,10 +104,5 @@ def process_article(article_text):
         final_response = "Error processing response"
     return final_response
 
-# Example usage
-if __name__ == "__main__":
-    initialize_model()
-    initialize_llm()
-    article_text = "Your article text here..."
-    result = process_article(article_text)
-    print(result)
+
+
