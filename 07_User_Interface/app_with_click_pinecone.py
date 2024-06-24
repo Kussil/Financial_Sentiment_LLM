@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 pc = Pinecone(api_key="bc4ea65c-d63e-48e4-9b65-53d6272d927d")
 embedding_model = SentenceTransformer("all-mpnet-base-v2")
 
+
 # Function to fetch stock data
 def fetch_data(ticker, start, end):
     """
@@ -269,11 +270,12 @@ if st.session_state.article_text:
     query = st.text_input('Enter your query:')
     if st.button('Generate Summary') and query:
         response = generate_summary(query, st.session_state.article_text, model)
+        st.session_state.response = response
         #st.write('Response:')
         #st.write(response)
     try:
         st.write('Response:')
-        st.write(response)
+        st.write(st.session_state.response)
     except:
         pass
         
