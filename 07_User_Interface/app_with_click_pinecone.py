@@ -284,10 +284,11 @@ if st.session_state.article_text:
     #query = st.text_input('Enter your query:')
     if st.button('Generate Vector Summary') and query:
         response_vector = ask_vector_query(query, 3, ticker, selected_date, pinecone_index="fastvectors")
+        st.session_state.response_vector = response_vector
         #st.write('Response:')
         #st.write(response_vector)
     try:
         st.write('Response:')
-        st.write(response_vector)
+        st.write(st.session_state.response_vector)
     except:
         pass
