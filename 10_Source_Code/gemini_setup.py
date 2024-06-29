@@ -43,42 +43,6 @@ def configure_gemini():
     model = genai.GenerativeModel('gemini-1.5-flash-latest', safety_settings=safety_settings)
     return model
 
-def find_first_unique_id_with_empty_values(file_path, categories):
-    """
-    Finds the first unique ID where any of the specified columns have empty values in a CSV file.
-
-    Args:
-        file_path (str): The path to the CSV file.
-        categories (list of str): List of column names to check for empty values.
-
-    Returns:
-        str: The first Unique_ID where any of the specified columns have empty values.
-        None: If no such row is found.
-    """
-    df = pd.read_csv(file_path)
-    for index, row in df.iterrows():
-        if row[categories].isnull().any() or (row[categories] == '').any():
-            return row['Unique_ID']
-    return None
-
-def get_gemini_inputs(text_df, unique_id):
-    """
-    Retrieves information from the DataFrame based on the unique ID and outputs company, source, headline, and text.
-
-    Args:
-        text_df (pd.DataFrame): The DataFrame containing the text data.
-        unique_id (str): The unique ID to search for.
-
-    Returns:
-        tuple: A tuple containing company, source, headline, and text.
-    """
-    row = text_df[text_df['Unique_ID'] == unique_id]
-    company = row['Ticker'].values[0]
-    source = row['Source'].values[0]
-    headline = row['Article Headline'].values[0]
-    text = row['Article Text'].values[0]
-    return company, source, headline, text
-
 def query_gemini(prompt, model):
     """
     Query Gemini to perform sentiment analysis on text from various sources about a company.
