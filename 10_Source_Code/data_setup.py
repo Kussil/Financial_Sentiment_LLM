@@ -1,5 +1,3 @@
-# data_setup.py
-
 """
 This module provides functions to load, clean, and process data for sentiment analysis.
 
