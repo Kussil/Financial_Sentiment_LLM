@@ -296,7 +296,7 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
 
         try:
             # Slider for select top number of vector results
-            num_days_back = st.select_slider("Select Number of References to Answer From", 
+            num_days_back = st.select_slider("Select Number of Days Back to Use", 
                                                     options = list(range(0,15)),
                                                     value = 7,
                                                     key='num_days')
@@ -307,10 +307,7 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
         except:
             pass
 
-        # Slider for select top number of vector results
-        selected_chunk_count = st.select_slider("Select Number of References to Answer From", 
-                                                options = list(range(3,11)), 
-                                                key='select_chunk')
+
 
 # LLM Model setup.  (API Key needs to be in your environment variables)
 key = 'GOOGLE_API_KEY'
@@ -322,8 +319,20 @@ model = genai.GenerativeModel('gemini-1.5-flash-latest')
 # Query input and response
 if st.session_state.date_object:
     st.header('Stock Query')
-    st.write('What is impacting ' + ticker + ' stock price?')
-    query = 'What is impacting ' + ticker + ' stock price?'
+    
+    # Slider for select top number of vector results
+    selected_chunk_count = st.select_slider("Select Number of References to Answer From", 
+                                                options = list(range(3,11)), 
+                                                key='select_chunk')
+    
+    # Create up or down indictor of stock price change for query
+    if st.session_state.stock_change > 0:
+        up_down = 'up'
+    else:
+        up_down = 'down'
+    
+    st.write('What is impacting ' + ticker + ' stock price to go ' + up_down +'?')
+    query = 'What is impacting ' + ticker + ' stock price' + up_down +'?'
     if st.button('Generate Response') and query:
         response_vector, article_ids = ask_vector_query(query, selected_chunk_count, ticker, selected_date, "fastvectors", num_days_back)
         st.session_state.response_vector = response_vector
@@ -339,6 +348,7 @@ st.divider()
 # Query input and response
 if st.session_state.response_vector:
     st.header('Custom Query')
+    
     st.write('Ask your own question about articles:')
     ask_query = st.text_input('Enter your query:')
     
