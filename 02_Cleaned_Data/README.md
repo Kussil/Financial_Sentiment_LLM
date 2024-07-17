@@ -17,4 +17,4 @@ All CSV files have been cleaned and organized to follow a uniform tabular struct
 ### Jupyter Notebook
 - **Text_Preprocessing.ipynb**
 
-This Jupyter Notebook handles the text preprocessing of the datasets. It includes various steps for cleaning and standardizing the data from different sources. Each data source is processed individually according to its requirements, but all are cleaned to a consistent standard.
+  This Jupyter Notebook handles the text preprocessing of the datasets. It includes various steps for cleaning and standardizing the data from different sources. Each data source is processed individually according to its requirements, but all are cleaned to a consistent standard.
