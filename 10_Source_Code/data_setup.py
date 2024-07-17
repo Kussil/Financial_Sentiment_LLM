@@ -46,7 +46,9 @@ def load_cleaned_data() -> pd.DataFrame:
 
     # Concatenate the DataFrames
     text_df = pd.concat([
-        invest_df1, invest_df2, proquest_df, sec_df,
+        invest_df1, invest_df2,
+         proquest_df,
+            sec_df,
         earnings_presentations, earnings_qa
     ], ignore_index=True)
     
@@ -236,6 +238,8 @@ def update_csv(file_path, unique_id, sentiment_dict):
     df = pd.read_csv(file_path)
     row_index = df[df['Unique_ID'] == unique_id].index
     for category, sentiment in sentiment_dict.items():
+        if sentiment == "N/A":
+            sentiment = "Neutral"
         df.loc[row_index, category] = sentiment
     df.to_csv(file_path, index=False)
     print(f"Row with Unique_ID '{unique_id}' has been updated.")
