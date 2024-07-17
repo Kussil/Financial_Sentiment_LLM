@@ -11,8 +11,10 @@ This folder contains the cleaned datasets and preprocessing script for the Finan
 - **Investment_Research_Part2.csv**
 - **ProQuest_Articles.csv**
 - **SEC_Filings.csv**
+
 All CSV files have been cleaned and organized to follow a uniform tabular structure. The Investment Research files are split due to GitHub file size constraints. Notebooks in the 03_Sentiment_Analysis folder will concatenate ALL of these files into a single dataframe.
 
 ### Jupyter Notebook
-- **Text_Preprocessing.ipynb**  
+- **Text_Preprocessing.ipynb**
+
 This Jupyter Notebook handles the text preprocessing of the datasets. It includes various steps for cleaning and standardizing the data from different sources. Each data source is processed individually according to its requirements, but all are cleaned to a consistent standard.
