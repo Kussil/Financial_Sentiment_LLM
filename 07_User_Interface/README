@@ -1,14 +1,12 @@
 # 07_User_Interface Folder
 
-This folder contains
+This folder contains:
 
 ## Directory Contents
 - **app_demo.py**
 
-### Running the Application
+## Running the Application
 To run the Streamlit application, execute the following command in your terminal:
 
-To run the Streamlit application, execute the following command in your terminal:
-'''sh
+```sh
 streamlit run app_demo.py
-'''
