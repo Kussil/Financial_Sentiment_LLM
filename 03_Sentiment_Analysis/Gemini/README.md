@@ -1,6 +1,6 @@
 # Gemini Subfolder
 
-This subfolder contains the sentiment analysis files using [Google Gemini](https://gemini.google.com/). Below is a brief description of each subfolder and its purposes.
+This subfolder contains sentiment analysis files using [Google Gemini](https://gemini.google.com/). Below is a brief description of each subfolder and its purposes.
 
 ## Directory Contents
 
