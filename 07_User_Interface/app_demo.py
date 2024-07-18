@@ -223,19 +223,19 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
 
 
 # Streamlit app layout
-st.title('Stock Price Analyzer')
+st.title('FAST OG: Stock Price Analyzer')
 
 # Load CSV into a DataFrame
 #csv_path = os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv')
 #sec_df = pd.read_csv(csv_path)
 
 # Load sentiment results
-df_sentiment = pd.read_csv(os.path.join(os.pardir,'03_Sentiment_Analysis','Prompt2_Sentiment_Analysis_Results.csv'))
+df_sentiment = pd.read_csv(os.path.join(os.pardir,'03_Sentiment_Analysis', 'Gemini', 'Prompt2', 'Prompt2_Sentiment_Analysis_Results.csv'))
 
 # Load Vector Chunk References
-df1_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Article_Chunk_References_pt1.csv'))
-df2_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Article_Chunk_References_pt2.csv'))
-df3_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Article_Chunk_References_pt3.csv'))
+df1_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt1.csv'))
+df2_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt2.csv'))
+df3_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt3.csv'))
 df_chunk = pd.concat([df1_chunk, df2_chunk, df3_chunk], ignore_index=True)
 
 # Load Article Headline and URL References
@@ -273,8 +273,8 @@ if 'stock_change' not in st.session_state:
     st.session_state.stock_change = None
 
 # Fixed dates for the plot
-start_date = datetime(2019, 1, 1)
-end_date = datetime.today()
+start_date = pd.to_datetime(articles_df['Date']).min()#datetime(2019, 1, 1)
+end_date = pd.to_datetime(articles_df['Date']).max() - pd.Timedelta(days=5)#datetime.today()
 
 # Fetch and plot stock data if a plot is shown and a ticker is selected
 if st.session_state.plot_shown and st.session_state.selected_ticker:
@@ -292,14 +292,15 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
         
         st.divider()
         
-        st.header('Sentiment Summary')
-
         try:
-            # Slider for select top number of vector results
-            num_days_back = st.select_slider("Select Number of Days Back to Use", 
-                                                    options = list(range(0,15)),
-                                                    value = 7,
-                                                    key='num_days')
+            st.header('Sentiment Summary')
+
+            num_days_back = 7
+            # Slider for select top number of vector results, used for sensitivit testing
+            #num_days_back = st.select_slider("Select Number of Days Back to Use", 
+            #                                        options = list(range(0,15)),
+            #                                        value = 7,
+            #                                        key='num_days')
         
             # Draw Sentiment Plot
             fig_sent = plot_sentiment(df_sentiment, st.session_state.selected_ticker, date_object, num_days_back)   
@@ -317,57 +318,63 @@ model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
        
 # Query input and response
-if st.session_state.date_object:
-    st.header('Stock Query')
-    
-    # Slider for select top number of vector results
-    selected_chunk_count = st.select_slider("Select Number of References to Answer From", 
-                                                options = list(range(3,11)), 
-                                                key='select_chunk')
-    
-    # Create up or down indictor of stock price change for query
-    if st.session_state.stock_change > 0:
-        up_down = 'up'
-    else:
-        up_down = 'down'
-    
-    st.write('What is impacting ' + ticker + ' stock price to go ' + up_down +'?')
-    query = 'What is impacting ' + ticker + ' stock price' + up_down +'?'
-    if st.button('Generate Response') and query:
-        response_vector, article_ids = ask_vector_query(query, selected_chunk_count, ticker, selected_date, "fastvectors", num_days_back)
-        st.session_state.response_vector = response_vector
-    try:
-        st.write('Response:')
-        st.write(st.session_state.response_vector)
-        st.write(articles_df[articles_df['Unique_ID'].isin(article_ids)])
-    except:
-        pass
+try:
+    if st.session_state.date_object and st.session_state.stock_change != None:
+        st.header('Stock Query')
+        
+        selected_chunk_count = 5
+        # Slider for select top number of vector results, used for sensitivity testing
+        #selected_chunk_count = st.select_slider("Select Number of References to Answer From", 
+        #                                            options = list(range(3,11)), 
+        #                                            key='select_chunk')
+        
+        # Create up or down indictor of stock price change for query
+        if st.session_state.stock_change > 0:
+            up_down = 'up'
+        else:
+            up_down = 'down'
+        
+        st.write('What is impacting ' + ticker + ' stock price to go ' + up_down +'?')
+        query = 'What is impacting ' + ticker + ' stock price' + up_down +'?'
+        if st.button('Generate Response') and query:
+            response_vector, article_ids = ask_vector_query(query, selected_chunk_count, ticker, selected_date, "fastvectors", num_days_back)
+            st.session_state.response_vector = response_vector
+            print(st.session_state.response_vector)
+        try:
+            st.write('Response:')
+            st.write(st.session_state.response_vector)
+            st.write(articles_df[articles_df['Unique_ID'].isin(article_ids)])
+        except:
+            pass
+except:
+    pass
 
-st.divider()
+#st.divider()
 
-# Query input and response
-if st.session_state.response_vector:
-    st.header('Custom Query')
-    
-    st.write('Ask your own question about articles:')
-    ask_query = st.text_input('Enter your query:')
-    
-    on = st.toggle("Used Selected Date", value=True)
-    if on:
-        ask_selected_date = selected_date
-    else:
-        ask_selected_date = None
-    
-    # Slider for select top number of vector results
-    selected_ask_chunk_count = st.select_slider("Select Number of References to Answer From", 
-                                                options = list(range(3,11)), 
-                                                key='ask_chunk')
-    if st.button('Ask Question') and ask_query:
-        ask_response, ask_article_ids = ask_vector_query(ask_query, selected_ask_chunk_count, ticker, ask_selected_date, "fastvectors", num_days_back)
-        st.session_state.ask_response = ask_response
-    try:
-        st.write('Ask Response:')
-        st.write(st.session_state.ask_response)
-        st.write(articles_df[articles_df['Unique_ID'].isin(ask_article_ids)].style.hide_index())
-    except:
-        pass
+# Query input and response, comment out for demo
+#if st.session_state.response_vector:
+#    st.header('Custom Query')
+#    
+#    st.write('Ask your own question about articles:')
+#    ask_query = st.text_input('Enter your query:')
+#    
+#    on = st.toggle("Used Selected Date", value=True)
+#    if on:
+#        ask_selected_date = selected_date
+#    else:
+#        ask_selected_date = None
+#    
+#    selected_ask_chunk_count = 5
+#    # Slider for select top number of vector results, used for sensitivity testing
+#    #selected_ask_chunk_count = st.select_slider("Select Number of References to Answer From", 
+#    #                                            options = list(range(3,11)), 
+#    #                                            key='ask_chunk')
+#    if st.button('Ask Question') and ask_query:
+#        ask_response, ask_article_ids = ask_vector_query(ask_query, selected_ask_chunk_count, ticker, ask_selected_date, "fastvectors", num_days_back)
+#        st.session_state.ask_response = ask_response
+#    try:
+#        st.write('Ask Response:')
+#        st.write(st.session_state.ask_response)
+#        st.write(articles_df[articles_df['Unique_ID'].isin(ask_article_ids)].style.hide_index())
+#    except:
+#        pass
