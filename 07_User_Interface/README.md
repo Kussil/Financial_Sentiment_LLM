@@ -10,3 +10,5 @@ To run the Streamlit application, execute the following command in your terminal
 
 ```sh
 streamlit run app_demo.py
+```
+This command will start a local web server, and you can view the application by navigating to http://localhost:8501 in your web browser.
