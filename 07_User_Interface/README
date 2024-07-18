@@ -9,6 +9,6 @@ This folder contains
 To run the Streamlit application, execute the following command in your terminal:
 
 To run the Streamlit application, execute the following command in your terminal:
-\begin{verbatim}
+'''sh
 streamlit run app_demo.py
-\end{verbatim}
+'''
