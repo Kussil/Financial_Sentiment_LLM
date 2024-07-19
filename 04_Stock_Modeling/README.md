@@ -1,33 +1,29 @@
-
 # 04_Stock_Modeling Folder
 
 This directory contains files and scripts related to stock modeling. The purpose of these files is to analyze stock data, build predictive models, and evaluate the performance of these models.
 
-## Table of Contents
+## Directory Contents
 
-1. [Guidelines for Using 04_Stock_Modeling Folder](#guidelines-for-using-04_stock_modeling-folder)
-2. [Note](#note)
-3. [List of Files](#list-of-files)
+- [Aggregated_Stock_Data](./Aggregated_Stock_Data/README.md)
+     
+     Contains working notebooks for data aggregation and preliminary analysis.
+- [Flat_Stock_Data](./Flat_Stock_Data/README.md)
+    
+    Contains scripts and models for flat stock data modeling.
 
-## Guidelines for Using 04_Stock_Modeling Folder
+## Installation
 
-1. **Data Analysis**: Scripts for analyzing stock data and generating insights.
-2. **Model Building**: Scripts for building predictive models based on the analyzed data.
-3. **Model Evaluation**: Scripts for evaluating the performance of the predictive models.
-4. **Documentation**: Documentation files that explain the methodology, results, and conclusions of the stock modeling.
+To get started with the stock modeling project, ensure you have the following prerequisites:
 
-## Note
+To get started with the stock modeling project, ensure you have the following prerequisites:
 
-- Ensure all scripts are well-documented and include comments explaining the logic and steps involved.
-- Store any large datasets outside the repository to avoid exceeding storage limits.
-- Regularly update the documentation to reflect any changes or improvements made to the models or analysis.
+1. **Gemini API key** - Obtain a key to access the Gemini API. Follow the instructions [here](https://www.gemini.com/cryptopedia/api).
+2. **Hugging Face API key** - Obtain a key to access Hugging Face models. Follow the instructions [here](https://huggingface.co/docs/api-inference/quicktour#getting-started).
+3. **GitHub API key** - Obtain a key to access GitHub API. Follow the instructions [here](https://docs.github.com/en/rest/overview/other-authentication-methods#personal-access-tokens).
+4. **Google Colab access** - Notebooks are designed to work using Google Colab VM machines with GPU. You can access Google Colab [here](https://colab.research.google.com/).
 
-## List of Files
 
-To list the files stored in this folder, use the following command in your terminal:
+## Usage
 
-```sh
-ls -la 04_Stock_Modeling
-```
+Refer to the individual README files in each subfolder for specific usage instructions.
 
-By following these guidelines, you can ensure that the 04_Stock_Modeling folder remains organized and is used effectively for stock modeling tasks.
