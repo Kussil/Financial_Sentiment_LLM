@@ -1,5 +1,5 @@
 # Financial Analysis Sentiment Tool
-![Logo](09_Miscellaneous/Project_logo_ReadMe.png)
+![Logo](09_Miscellaneous/logo_3.png)
 
 
 ## Table of Contents
