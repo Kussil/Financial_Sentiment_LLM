@@ -11,16 +11,16 @@ This subfolder contains the sentiment analysis files using [FinBERT](https://hug
   
 - **finbert_sentiment_chunkdata_pt1.csv**
 
-  CSV file containing the chunk text and the sentiment analysis results data processed by FinBERT (part 1).
+  CSV file containing the chunk text processed by FinBERT as reference for the vector database (part 1).
   
 - **finbert_sentiment_chunkdata_pt2.csv**
 
-   CSV file containing the chunk text and the sentiment analysis results data processed by FinBERT (part 2).
+   CSV file containing the chunk text processed by FinBERT as reference for the vector database  (part 2).
   
 - **finbert_sentiment_chunkdata_pt3.csv**
 
-   CSV file containing the chunk text and the sentiment analysis results data processed by FinBERT (part 3).
+   CSV file containing the chunk text processed by FinBERT as reference for the vector database  (part 3).
   
 - **finbert_sentiment_data.csv**
 
-  CSV file containing the sentiment analysis results by article processed by FinBERT.
+   CSV file containing the sentiment analysis results by article processed by FinBERT.
