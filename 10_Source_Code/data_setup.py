@@ -221,7 +221,7 @@ def extract_and_convert_to_dict(response):
         print("JSONDecodeError:", e)
         return None
 
-def update_csv(file_path, unique_id, sentiment_dict):
+def update_csv(file_path, unique_id, sentiment_dict, categories):
     """
     Updates the columns of a CSV file based on the unique ID and sentiment dictionary.
 
@@ -229,16 +229,22 @@ def update_csv(file_path, unique_id, sentiment_dict):
         file_path (str): The path to the CSV file.
         unique_id (str): The unique ID of the row to be updated.
         sentiment_dict (dict): A dictionary with categories as keys and their corresponding sentiments as values.
+        categories (list): List of all possible categories.
 
     Returns:
         None
     """
     df = pd.read_csv(file_path)
     row_index = df[df['Unique_ID'] == unique_id].index
-    for category, sentiment in sentiment_dict.items():
+    for category in categories:
+        sentiment = sentiment_dict.get(category, "No JSON found")
+        if sentiment == "N/A":
+            sentiment = "Neutral"
         df.loc[row_index, category] = sentiment
     df.to_csv(file_path, index=False)
     print(f"Row with Unique_ID '{unique_id}' has been updated.")
+
+
 
 
 if __name__ == "__main__":
