@@ -9,11 +9,8 @@ This subfolder contains the revised versions of the sentiment analysis notebooks
 
   CSV file containing the full sentiment analysis results from the LLama model.
   
-- **Prompt_Sentiment_Analysis_LLama_Local.ipynb**
-
-  Notebook for performing sentiment analysis using LLama with local logic. This notebook is a working version that may require further bug fixes.
   
-- **Prompt_local_LLama.ipynb**
+- **Complete_local_Llama_notebook.ipynb**
 
   Notebook for performing sentiment analysis using LLama with minor adjustments.
   
