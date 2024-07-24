@@ -1,20 +1,14 @@
-# 02_Cleaned_Data Folder
+# 01_Raw_Data Folder
 
-This folder contains the cleaned datasets and preprocessing script for the Financial Sentiment LLM project. These cleaned data files will be used by the notebooks in the 03_Sentiment_Analysis folder. Below is a brief description of each file and its purpose.
+This folder contains the raw data which was collected through data wrangling and data scraping following the selection of sources that were used. The four source types each have a subdirectory folder which structure is described below. There is also a subdirectory which contains example notebooks of the processes that were utilized to scrape the data for certain source types. This data was compiled to .csv format for further cleaning which can be seen in the 02_Cleaned_Data directory.
 
 ## Directory Contents
 
-### CSV Files
-- **Earnings_Presentations.csv**
-- **Earnings_QA.csv**
-- **Investment_Research_Part1.csv**
-- **Investment_Research_Part2.csv**
-- **ProQuest_Articles.csv**
-- **SEC_Filings.csv**
-
-All CSV files have been cleaned and organized to follow a uniform tabular structure. The Investment Research files are split due to GitHub file size constraints. Notebooks in the 03_Sentiment_Analysis folder will concatenate ALL of these files into a single dataframe.
-
-### Jupyter Notebook
-- **Text_Preprocessing.ipynb**
-
-  This Jupyter Notebook handles the text preprocessing of the datasets. It includes various steps for cleaning and standardizing the data from different sources. Each data source is processed individually according to its requirements, but all are cleaned to a consistent standard. This notebook pulls raw data from the 01_Raw_Data folder.
+### Subdirectories (Sources)
+- **Earnings_Transcripts**
+- **Earnin.csv**
+- **Investment_Research_Analysts_Reports**
+- **ProQuest_News_Articles**
+- **SEC_Data**
+### Subdirectories (References)
+- **Extraction_Notebooks**
