@@ -17,6 +17,3 @@ This folder contains the sentiment analysis notebooks and outputs. Note that the
 
   Contains sentiment analysis files using [Meta's Llama 3](https://huggingface.co/meta-llama/Meta-Llama-3-8B).
   
-- **Revised_notebooks**
-
-  TBD
