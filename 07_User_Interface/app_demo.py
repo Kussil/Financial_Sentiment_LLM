@@ -128,19 +128,22 @@ def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
     return fig
 
 
-def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_back):
+def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_back, df_chunk, up_down):
     """
-    Queries a vector database with an embedded query and retrieves relevant text chunks based on filters.
-    
-    Parameters:
-    query (str): The query string to be embedded and searched in the vector database.
-    top_results (int): The number of top results to retrieve from the vector database.
-    ticker (str): The stock ticker to filter the search results.
-    date (str or None): The date to filter the search results. If None, no date filter is applied.
-    pinecone_index (str, optional): The name of the Pinecone index to use. Default is "fastvectors".
-    
+    Queries a vector database for relevant financial news articles based on a given query and filters.
+
+    Args:
+        query (str): The query string to embed and search against.
+        top_results (int): The number of top results to return from the vector database.
+        ticker (str): The stock ticker symbol to filter articles by.
+        date (str or None): The specific date to filter articles by in 'YYYY-MM-DD' format. If None, no date filter is applied.
+        pinecone_index (str): The name of the Pinecone index to query.
+        num_days_back (int): The number of days back from the given date to include in the date filter.
+        df_chunk (pd.DataFrame): DataFrame containing article chunks with 'Chunk_ID' and 'Text Chunks' columns.
+        up_down (str or None): Indicator for filtering articles based on predicted stock movement ('up' or 'down'). If None, this filter is ignored.
+
     Returns:
-    str: A generated response text based on the context retrieved from the vector database.
+        tuple: A tuple containing the generated response text and a list of article IDs from which text chunks were retrieved.
     
     Notes:
     - The function first embeds the query using the `embedding_model`.
@@ -156,7 +159,26 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
     if date == None:
         # If no date passed exclude date filter
         filter={"ticker": {"$eq": ticker}}
+    elif date != None and up_down != None:
+        # translate up_down
+        if up_down == 'up':
+            up_down_indicator = 1
+        else:
+            up_down_indicator = 0
+
+        # Convert the string to a datetime object
+        date_obj = date#datetime.strptime(date, '%Y-%m-%d')
+
+        # Generate the list of dates for the previous week
+        previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(0, num_days_back + 1)]
+        print(previous_week_dates)
         
+        # Create Filter
+        filter={
+            "ticker": {"$eq": ticker},
+            "date": {"$in": previous_week_dates},
+            "up_down_prediction": {"$eq": str(up_down_indicator)}
+        }
     else:
         # Convert the string to a datetime object
         date_obj = date#datetime.strptime(date, '%Y-%m-%d')
@@ -209,9 +231,9 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
         {query} \
         \
         Example Response: \
-        - The stock went up because of X \
-        - The stock price went down because of Y \
-        - The stock was impacted by Z \
+        - subject: explanation \
+        - subject: explanation \
+        - subject: explanation \
         "
         
     print('#####################################################################################')
@@ -237,6 +259,12 @@ df1_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini',
 df2_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt2.csv'))
 df3_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt3.csv'))
 df_chunk = pd.concat([df1_chunk, df2_chunk, df3_chunk], ignore_index=True)
+
+# Load Vector Full Article References
+df1_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt1.csv'))
+df2_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt2.csv'))
+df3_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt3.csv'))
+df_full = pd.concat([df1_full, df2_full, df3_full], ignore_index=True)
 
 # Load Article Headline and URL References
 columns_to_load = ['Source', 'Unique_ID', 'Date', 'Article Headline', 'URL']
@@ -337,7 +365,7 @@ try:
         st.write('What is impacting ' + ticker + ' stock price to go ' + up_down +'?')
         query = 'What is impacting ' + ticker + ' stock price' + up_down +'?'
         if st.button('Generate Response') and query:
-            response_vector, article_ids = ask_vector_query(query, selected_chunk_count, ticker, selected_date, "fastvectors", num_days_back)
+            response_vector, article_ids = ask_vector_query(query, selected_chunk_count, ticker, selected_date, "fastfullvectors", num_days_back, df_full, up_down)
             st.session_state.response_vector = response_vector
             print(st.session_state.response_vector)
         try:
@@ -350,15 +378,15 @@ except:
     pass
 
 #st.divider()
-
+#
 # Query input and response, comment out for demo
 #if st.session_state.response_vector:
 #    st.header('Custom Query')
 #    
-#    st.write('Ask your own question about articles:')
-#    ask_query = st.text_input('Enter your query:')
+#    st.write('What is impacting ' + ticker + ' stock price to go ' + up_down +'?')#st.write('Ask your own question about articles:')
+#    ask_query = 'What is impacting ' + ticker + ' stock price' + up_down +'?'#st.text_input('Enter your query:')
 #    
-#    on = st.toggle("Used Selected Date", value=True)
+#    on = st.toggle("Use Selected Date", value=True)
 #    if on:
 #        ask_selected_date = selected_date
 #    else:
@@ -370,11 +398,11 @@ except:
 #    #                                            options = list(range(3,11)), 
 #    #                                            key='ask_chunk')
 #    if st.button('Ask Question') and ask_query:
-#        ask_response, ask_article_ids = ask_vector_query(ask_query, selected_ask_chunk_count, ticker, ask_selected_date, "fastvectors", num_days_back)
+#        ask_response, ask_article_ids = ask_vector_query(ask_query, selected_ask_chunk_count, ticker, ask_selected_date, "fastfullvectors", num_days_back, df_full, up_down)
 #        st.session_state.ask_response = ask_response
 #    try:
 #        st.write('Ask Response:')
 #        st.write(st.session_state.ask_response)
-#        st.write(articles_df[articles_df['Unique_ID'].isin(ask_article_ids)].style.hide_index())
+#        st.write(articles_df[articles_df['Unique_ID'].isin(ask_article_ids)])
 #    except:
 #        pass
