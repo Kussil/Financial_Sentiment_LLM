@@ -47,24 +47,33 @@ def plot_data(stock_data, ticker):
 
     Returns:
     plotly.graph_objs._figure.Figure: Plotly figure object with the stock price plot.
-    """
-    fig = px.line(stock_data, 
-                  x=stock_data.index, 
+    """ 
+    min_date = stock_data.index.min().to_pydatetime()
+    max_date = stock_data.index.max().to_pydatetime()
+
+    date_range = st.slider("Select Graph Date Range", min_value=min_date, max_value=max_date, value=(min_date, max_date))
+    filtered_data = stock_data.loc[date_range[0]:date_range[1]]  
+
+    fig = px.line(filtered_data, 
+                  x=filtered_data.index, 
                   y='Close', 
                   title=f'Stock Prices for {ticker}')
     fig.update_layout(title=f'Stock Prices for {ticker}',
                       xaxis_title='Date',
                       yaxis_title='Stock Price (USD)')
-    fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}')
+    fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}<br>Change: %{customdata:.2f}%')
+    fig.for_each_trace(lambda trace: trace.update(customdata=filtered_data['Change'].values*100))
     try:
         selected_points = plotly_events(fig)
         graph_date = selected_points[0]['x']
+        print(graph_date)
         date_object = datetime.strptime(graph_date, "%Y-%m-%d")
-        st.session_state.stock_change = stock_data['Change'].loc[graph_date]
-        
-        
+        st.session_state.stock_change = filtered_data['Change'].loc[graph_date]
+            
     except:
         date_object = end_date
+        graph_date = '2024-05-13'
+        st.session_state.stock_change = filtered_data['Change'].loc[graph_date]
     
     # set date_object to trigger query
     st.session_state.date_object = date_object
@@ -108,11 +117,11 @@ def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
     summary = summary.reset_index()
 
     # Melt DataFrame to have Sentiment as a categorical variable
-    summary_melted = pd.melt(summary, id_vars=['index'], var_name='Sentiment', value_name='Count')
-
+    summary_melted = pd.melt(summary, id_vars=['index'], var_name='Sentiment', value_name='Article Count')
+    
     # Plotting with Plotly Express
-    fig = px.bar(summary_melted, x='Count', y='index', color='Sentiment', orientation='h',
-                 labels={'index': 'Category', 'Count': 'Count', 'Sentiment': 'Sentiment'},
+    fig = px.bar(summary_melted, x='Article Count', y='index', color='Sentiment', orientation='h',
+                 labels={'index': 'Category', 'Article Count': 'Article Count', 'Sentiment': 'Sentiment'},
                  title='Sentiment Counts',
                  barmode='stack',
                  color_discrete_map = {'Negative': 'red', 'Neutral': 'gray', 'Positive': 'green'})
@@ -122,6 +131,9 @@ def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
                          'y': 0.95,  # Position title slightly above the plot
                          'xanchor': 'center',  # Center align title horizontally
                          'yanchor': 'top'})  # Position title slightly above the plot
+    
+    # Update the x-axis to show integer ticks only
+    fig.update_xaxes(tickmode='array', tickvals=list(range(0, len(summary))))
 
       
     
@@ -161,7 +173,7 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
         filter={"ticker": {"$eq": ticker}}
     elif date != None and up_down != None:
         # translate up_down
-        if up_down == 'up':
+        if up_down == 'increase':
             up_down_indicator = 1
         else:
             up_down_indicator = 0
@@ -231,9 +243,9 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
         {query} \
         \
         Example Response: \
-        - subject: explanation \
-        - subject: explanation \
-        - subject: explanation \
+        - **subject**: explanation \
+        - **subject**: explanation \
+        - **subject**: explanation \
         "
         
     print('#####################################################################################')
@@ -245,7 +257,7 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
 
 
 # Streamlit app layout
-st.title('FAST OG: Stock Price Analyzer')
+st.markdown("<h1 style='text-align: center;'>FAST OG: Stock Price Analyzer</h1>", unsafe_allow_html=True)
 
 # Load CSV into a DataFrame
 #csv_path = os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv')
@@ -265,6 +277,7 @@ df1_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 
 df2_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt2.csv'))
 df3_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt3.csv'))
 df_full = pd.concat([df1_full, df2_full, df3_full], ignore_index=True)
+df_full['Unique_ID'] = df_full['Chunk_ID'].apply(lambda x: '-'.join(x.split('-')[:2]))
 
 # Load Article Headline and URL References
 columns_to_load = ['Source', 'Unique_ID', 'Date', 'Article Headline', 'URL']
@@ -299,6 +312,8 @@ if 'response_vector' not in st.session_state:
     st.session_state.response_vector = None
 if 'stock_change' not in st.session_state:
     st.session_state.stock_change = None
+if 'articles_df_filtered' not in st.session_state:
+    st.session_state.articles_df_filtered = None
 
 # Fixed dates for the plot
 start_date = pd.to_datetime(articles_df['Date']).min()#datetime(2019, 1, 1)
@@ -307,21 +322,25 @@ end_date = pd.to_datetime(articles_df['Date']).max() - pd.Timedelta(days=5)#date
 # Fetch and plot stock data if a plot is shown and a ticker is selected
 if st.session_state.plot_shown and st.session_state.selected_ticker:
     data = fetch_data(st.session_state.selected_ticker, start_date, end_date)
-    if not data.empty:
+    if not data.empty:     
         fig, date_object = plot_data(data, st.session_state.selected_ticker)
-        
+
         # Add a date selector for the article        
         selected_date = st.date_input('Choose date from graph or select a date within the range', date_object, key='selected_date')
         
         try:
-            st.write(f'Stock change for {selected_date} was {st.session_state.stock_change:.0%}')
+            if st.session_state.stock_change > 0:
+                up_down = 'increase'
+            else:
+                up_down = 'decrease'
+            st.write(f'Daily stock price change on {selected_date}: **{abs(st.session_state.stock_change):.0%} {up_down}**')
         except:
             pass
         
         st.divider()
         
         try:
-            st.header('Sentiment Summary')
+            st.markdown("<h2 style='text-align: center;'>Sentiment Counts for Last Week of Articles</h2>", unsafe_allow_html=True)
 
             num_days_back = 7
             # Slider for select top number of vector results, used for sensitivit testing
@@ -331,7 +350,7 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
             #                                        key='num_days')
         
             # Draw Sentiment Plot
-            fig_sent = plot_sentiment(df_sentiment, st.session_state.selected_ticker, date_object, num_days_back)   
+            fig_sent = plot_sentiment(df_sentiment, st.session_state.selected_ticker, selected_date, num_days_back)   
             st.plotly_chart(fig_sent)
         except:
             pass
@@ -347,62 +366,69 @@ model = genai.GenerativeModel('gemini-1.5-flash-latest')
        
 # Query input and response
 try:
-    if st.session_state.date_object and st.session_state.stock_change != None:
-        st.header('Stock Query')
-        
+    if selected_date != None and st.session_state.stock_change != None:
+        #st.header('What potential factors caused ' + ticker + ' stock price to ' + up_down + ' on ' + str(selected_date) + '?')
+        st.markdown("<h2 style='text-align: center;'>" + \
+                    'What potential factors caused ' + ticker + ' stock price to ' + up_down + ' on ' + str(selected_date) + '?' + \
+                    "</h2>", unsafe_allow_html=True)
+
         selected_chunk_count = 5
         # Slider for select top number of vector results, used for sensitivity testing
         #selected_chunk_count = st.select_slider("Select Number of References to Answer From", 
         #                                            options = list(range(3,11)), 
         #                                            key='select_chunk')
         
-        # Create up or down indictor of stock price change for query
-        if st.session_state.stock_change > 0:
-            up_down = 'up'
-        else:
-            up_down = 'down'
-        
-        st.write('What is impacting ' + ticker + ' stock price to go ' + up_down +'?')
-        query = 'What is impacting ' + ticker + ' stock price' + up_down +'?'
-        if st.button('Generate Response') and query:
-            response_vector, article_ids = ask_vector_query(query, selected_chunk_count, ticker, selected_date, "fastfullvectors", num_days_back, df_full, up_down)
-            st.session_state.response_vector = response_vector
+        #st.write('What potential factors caused ' + ticker + ' stock price to ' + up_down + ' on ' + str(selected_date) + '?')
+        query = 'What potential factors caused ' + ticker + ' stock price to ' + up_down +'?'
+        if st.button('Generate Response from Google Gemini') and query:
+            response_vector, article_ids = ask_vector_query(query, selected_chunk_count, ticker, selected_date, "fastfullvectors", num_days_back, df_full, None)
+            st.session_state.response_vector = response_vector.replace('$','\$')
             print(st.session_state.response_vector)
         try:
             st.write('Response:')
             st.write(st.session_state.response_vector)
-            st.write(articles_df[articles_df['Unique_ID'].isin(article_ids)])
+            try:
+                st.session_state.articles_df_filtered = articles_df[articles_df['Unique_ID'].isin(article_ids)]
+            except:
+                pass
+            st.write('References:')
+            for index, row in st.session_state.articles_df_filtered.iterrows():
+                #st.write(f"Source: {row['Source']}, Article Headline: {row['Article Headline']}, Date: {row['Date']}, Article ID: {row['Unique_ID']}")
+                if st.checkbox(f"Show text for: Source: {row['Source']}, Article Headline: {row['Article Headline']}, Date: {row['Date']}, Article ID: {row['Unique_ID']}", key=row['Unique_ID']):
+                    with st.container(height=300):
+                        st.markdown(df_full[df_full['Unique_ID'] == row['Unique_ID']]['Text Chunks'].iloc[0])
         except:
             pass
+
 except:
     pass
 
-#st.divider()
-#
+st.divider()
+
 # Query input and response, comment out for demo
-#if st.session_state.response_vector:
-#    st.header('Custom Query')
-#    
-#    st.write('What is impacting ' + ticker + ' stock price to go ' + up_down +'?')#st.write('Ask your own question about articles:')
-#    ask_query = 'What is impacting ' + ticker + ' stock price' + up_down +'?'#st.text_input('Enter your query:')
-#    
-#    on = st.toggle("Use Selected Date", value=True)
-#    if on:
-#        ask_selected_date = selected_date
-#    else:
-#        ask_selected_date = None
-#    
-#    selected_ask_chunk_count = 5
-#    # Slider for select top number of vector results, used for sensitivity testing
-#    #selected_ask_chunk_count = st.select_slider("Select Number of References to Answer From", 
-#    #                                            options = list(range(3,11)), 
-#    #                                            key='ask_chunk')
-#    if st.button('Ask Question') and ask_query:
-#        ask_response, ask_article_ids = ask_vector_query(ask_query, selected_ask_chunk_count, ticker, ask_selected_date, "fastfullvectors", num_days_back, df_full, up_down)
-#        st.session_state.ask_response = ask_response
-#    try:
-#        st.write('Ask Response:')
-#        st.write(st.session_state.ask_response)
-#        st.write(articles_df[articles_df['Unique_ID'].isin(ask_article_ids)])
-#    except:
-#        pass
+if st.session_state.response_vector:
+    st.markdown("<h2 style='text-align: center;'>" + 'Custom Generative AI Query' + "</h2>", unsafe_allow_html=True)
+    
+    ask_query = st.text_input('Ask your own query:')
+
+    st.write(f'Toggle on to use full database, toggle off to use articles from {selected_date-timedelta(days=7)} to {selected_date}')
+    on = st.toggle("Use All Articles", value=True)
+    if on:
+        ask_selected_date = None
+    else:
+        ask_selected_date = selected_date
+    
+    selected_ask_chunk_count = 5
+    # Slider for select top number of vector results, used for sensitivity testing
+    #selected_ask_chunk_count = st.select_slider("Select Number of References to Answer From", 
+    #                                            options = list(range(3,11)), 
+    #                                            key='ask_chunk')
+    if st.button('Ask Question') and ask_query:
+        ask_response, ask_article_ids = ask_vector_query(ask_query, selected_ask_chunk_count, ticker, ask_selected_date, "fastfullvectors", num_days_back, df_full, None)
+        st.session_state.ask_response = ask_response
+    try:
+        st.write('Response:')
+        st.write(st.session_state.ask_response)
+        st.write(articles_df[articles_df['Unique_ID'].isin(ask_article_ids)])
+    except:
+        pass
