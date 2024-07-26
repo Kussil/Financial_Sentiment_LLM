@@ -263,113 +263,53 @@ st.markdown("<h1 style='text-align: center;'>FAST OG: Stock Price Analyzer</h1>"
 #csv_path = os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv')
 #sec_df = pd.read_csv(csv_path)
 
-# # Load sentiment results
-# df_sentiment = pd.read_csv(os.path.join(os.pardir,'03_Sentiment_Analysis', 'Gemini', 'Prompt2', 'Prompt2_Sentiment_Analysis_Results.csv'))
+# Define the base directory relative to the current script location
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
-
-# # Load Vector Chunk References
-# df1_chunk = pd.read_csv(os.path.abspath(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt1.csv')))
-# df2_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt2.csv'))
-# df3_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt3.csv'))
-# df_chunk = pd.concat([df1_chunk, df2_chunk, df3_chunk], ignore_index=True)
-
-# # Load Vector Full Article References
-# df1_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt1.csv'))
-# df2_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt2.csv'))
-# df3_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt3.csv'))
-# df_full = pd.concat([df1_full, df2_full, df3_full], ignore_index=True)
-# df_full['Unique_ID'] = df_full['Chunk_ID'].apply(lambda x: '-'.join(x.split('-')[:2]))
-# Define paths
-sentiment_path = os.path.join(os.pardir, '03_Sentiment_Analysis', 'Gemini', 'Prompt2', 'Prompt2_Sentiment_Analysis_Results.csv')
-chunk_paths = [
-    os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt1.csv'),
-    os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt2.csv'),
-    os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt3.csv')
-]
-full_paths = [
-    os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt1.csv'),
-    os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt2.csv'),
-    os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt3.csv')
-]
+# Helper function to load CSV files
+def load_csv(file_path):
+    full_path = os.path.join(base_dir, file_path)
+    if os.path.exists(full_path):
+        return pd.read_csv(full_path)
+    else:
+        print(f"File does not exist: {full_path}")
+        return pd.DataFrame()
 
 # Load sentiment results
-try:
-    df_sentiment = pd.read_csv(sentiment_path)
-except FileNotFoundError:
-    print(f"File not found: {sentiment_path}")
-    df_sentiment = pd.DataFrame()  # Handle appropriately if file is missing
+df_sentiment = load_csv('03_Sentiment_Analysis/Gemini/Prompt2/Prompt2_Sentiment_Analysis_Results.csv')
 
 # Load Vector Chunk References
-df_chunks = []
-for path in chunk_paths:
-    try:
-        df_chunk = pd.read_csv(path)
-        df_chunks.append(df_chunk)
-    except FileNotFoundError:
-        print(f"File not found: {path}")
-
-df_chunk = pd.concat(df_chunks, ignore_index=True) if df_chunks else pd.DataFrame()
+chunk_files = [
+    '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt1.csv',
+    '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt2.csv',
+    '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt3.csv'
+]
+df_chunks = [load_csv(file) for file in chunk_files]
+df_chunk = pd.concat(df_chunks, ignore_index=True)
 
 # Load Vector Full Article References
-df_fulls = []
-for path in full_paths:
-    try:
-        df_full = pd.read_csv(path)
-        df_fulls.append(df_full)
-    except FileNotFoundError:
-        print(f"File not found: {path}")
+full_files = [
+    '05_Create_Vector_DB/Gemini/Article_Full_References_pt1.csv',
+    '05_Create_Vector_DB/Gemini/Article_Full_References_pt2.csv',
+    '05_Create_Vector_DB/Gemini/Article_Full_References_pt3.csv'
+]
+df_full = pd.concat([load_csv(file) for file in full_files], ignore_index=True)
+df_full['Unique_ID'] = df_full['Chunk_ID'].apply(lambda x: '-'.join(x.split('-')[:2]))
 
-df_full = pd.concat(df_fulls, ignore_index=True) if df_fulls else pd.DataFrame()
-
-# Ensure 'Chunk_ID' column exists before creating 'Unique_ID'
-if 'Chunk_ID' in df_full.columns:
-    df_full['Unique_ID'] = df_full['Chunk_ID'].apply(lambda x: '-'.join(x.split('-')[:2]))
-else:
-    print("Column 'Chunk_ID' not found in df_full.")
-# # Load Article Headline and URL References
-# columns_to_load = ['Source', 'Unique_ID', 'Date', 'Article Headline', 'URL']
-# invest_df1 = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Investment_Research_Part1.csv'), usecols=columns_to_load)
-# invest_df2 = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Investment_Research_Part2.csv'), usecols=columns_to_load)
-# proquest_df = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'ProQuest_Articles.csv'), usecols=columns_to_load)
-# earnings_presentations = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Earnings_Presentations.csv'), usecols=columns_to_load)
-# earnings_qa = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Earnings_QA.csv'), usecols=columns_to_load)
-# sec_df = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv'), usecols=columns_to_load)
-# articles_df = pd.concat([invest_df1, invest_df2, proquest_df, sec_df, earnings_presentations, earnings_qa], ignore_index=True)
-# Define columns to load
+# Load Article Headline and URL References
 columns_to_load = ['Source', 'Unique_ID', 'Date', 'Article Headline', 'URL']
+article_files = [
+    '02_Cleaned_Data/Investment_Research_Part1.csv',
+    '02_Cleaned_Data/Investment_Research_Part2.csv',
+    '02_Cleaned_Data/ProQuest_Articles.csv',
+    '02_Cleaned_Data/Earnings_Presentations.csv',
+    '02_Cleaned_Data/Earnings_QA.csv',
+    '02_Cleaned_Data/SEC_Filings.csv'
+]
+articles_dfs = [load_csv(file)[columns_to_load] for file in article_files]
+articles_df = pd.concat(articles_dfs, ignore_index=True)
 
-# Define file paths
-file_paths = {
-    'Investment_Research_Part1': os.path.join(os.pardir, '02_Cleaned_Data', 'Investment_Research_Part1.csv'),
-    'Investment_Research_Part2': os.path.join(os.pardir, '02_Cleaned_Data', 'Investment_Research_Part2.csv'),
-    'ProQuest_Articles': os.path.join(os.pardir, '02_Cleaned_Data', 'ProQuest_Articles.csv'),
-    'Earnings_Presentations': os.path.join(os.pardir, '02_Cleaned_Data', 'Earnings_Presentations.csv'),
-    'Earnings_QA': os.path.join(os.pardir, '02_Cleaned_Data', 'Earnings_QA.csv'),
-    'SEC_Filings': os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv')
-}
 
-# Function to read CSV with error handling
-def read_csv_with_columns(file_path, columns):
-    try:
-        df = pd.read_csv(file_path, usecols=columns)
-        return df
-    except FileNotFoundError:
-        print(f"File not found: {file_path}")
-        return pd.DataFrame(columns=columns)  # Return empty DataFrame with specified columns
-    except ValueError as e:
-        print(f"Error reading file {file_path}: {e}")
-        return pd.DataFrame(columns=columns)  # Return empty DataFrame with specified columns
-
-# Load dataframes
-invest_df1 = read_csv_with_columns(file_paths['Investment_Research_Part1'], columns_to_load)
-invest_df2 = read_csv_with_columns(file_paths['Investment_Research_Part2'], columns_to_load)
-proquest_df = read_csv_with_columns(file_paths['ProQuest_Articles'], columns_to_load)
-earnings_presentations = read_csv_with_columns(file_paths['Earnings_Presentations'], columns_to_load)
-earnings_qa = read_csv_with_columns(file_paths['Earnings_QA'], columns_to_load)
-sec_df = read_csv_with_columns(file_paths['SEC_Filings'], columns_to_load)
-
-# Concatenate all dataframes
-articles_df = pd.concat([invest_df1, invest_df2, proquest_df, sec_df, earnings_presentations, earnings_qa], ignore_index=True)
 # Default tickers
 default_tickers = ['BP', 'COP', 'CVX', 'CXO', 'DVN', 'EOG', 'EQNR', 'HES', 'MPC', 'MRO', 'OXY', 'PDCE', 'PSX', 'PXD', 'SHEL', 'TTE', 'VLO', 'XOM']
 
@@ -439,7 +379,7 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
 
 
 # LLM Model setup.  (API Key needs to be in your environment variables)
-key = 'GOOGLE_API_KEY'
+key = 'AIzaSyC_hI1l9OTJhYoFw3UC-5LAfJXfENX9COs'
 GOOGLE_API_KEY = os.getenv(key)
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
