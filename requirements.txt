@@ -1,47 +1,10 @@
-# General packages
-tqdm
-pytz
-requests
-numpy
-pandas
-
-# Machine Learning packages
-scikit-learn
-xgboost
-torch
-
-# Document related packages
-pdfplumber
-beautifulsoup4
-
-# Visualization packages
-matplotlib
-plotly
-ipympl
-
-# Streamlit and related packages
 streamlit
 streamlit-plotly-events
-
-# Financial data and datetime packages
 yfinance
-
-# Large Language Model (LLM) related packages
-transformers
-sentence-transformers
-datasets
-bitsandbytes
-accelerate
-langchain
-langchain-community
-huggingface-hub
-
-# Google Generative AI
+plotly
+matplotlib
+pandas
 google-generativeai
-google-colab
-
-# Pinecone for vector databases
+sentence-transformers
 pinecone-client
 
-# Ollama
-ollama
