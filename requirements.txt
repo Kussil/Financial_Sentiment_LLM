@@ -1,7 +1,6 @@
 # General packages
 tqdm
 pytz
-getpass
 requests
 numpy
 pandas
