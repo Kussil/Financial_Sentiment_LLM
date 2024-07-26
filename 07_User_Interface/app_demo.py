@@ -280,6 +280,11 @@ df3_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 
 df_full = pd.concat([df1_full, df2_full, df3_full], ignore_index=True)
 df_full['Unique_ID'] = df_full['Chunk_ID'].apply(lambda x: '-'.join(x.split('-')[:2]))
 
+
+
+
+
+
 # Load Article Headline and URL References
 columns_to_load = ['Source', 'Unique_ID', 'Date', 'Article Headline', 'URL']
 invest_df1 = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Investment_Research_Part1.csv'), usecols=columns_to_load)
@@ -289,6 +294,11 @@ earnings_presentations = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 
 earnings_qa = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Earnings_QA.csv'), usecols=columns_to_load)
 sec_df = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv'), usecols=columns_to_load)
 articles_df = pd.concat([invest_df1, invest_df2, proquest_df, sec_df, earnings_presentations, earnings_qa], ignore_index=True)
+Define columns to load
+
+
+
+
 
 # Default tickers
 default_tickers = ['BP', 'COP', 'CVX', 'CXO', 'DVN', 'EOG', 'EQNR', 'HES', 'MPC', 'MRO', 'OXY', 'PDCE', 'PSX', 'PXD', 'SHEL', 'TTE', 'VLO', 'XOM']
