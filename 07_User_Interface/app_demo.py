@@ -264,16 +264,11 @@ st.markdown("<h1 style='text-align: center;'>FAST OG: Stock Price Analyzer</h1>"
 #sec_df = pd.read_csv(csv_path)
 
 # Load sentiment results
-#df_sentiment = pd.read_csv(os.path.join(os.pardir,'03_Sentiment_Analysis', 'Gemini', 'Prompt2', 'Prompt2_Sentiment_Analysis_Results.csv'))
-file_path = os.path.abspath(os.path.join(os.pardir, '03_Sentiment_Analysis', 'Gemini', 'Prompt2', 'Prompt2_Sentiment_Analysis_Results.csv'))
-print("File path:", file_path)
+df_sentiment = pd.read_csv(os.path.join(os.pardir,'03_Sentiment_Analysis', 'Gemini', 'Prompt2', 'Prompt2_Sentiment_Analysis_Results.csv'))
 
-try:
-    df_sentiment = pd.read_csv(file_path)
-except FileNotFoundError:
-    print(f"File not found: {file_path}")
+
 # Load Vector Chunk References
-df1_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt1.csv'))
+df1_chunk = pd.read_csv(os.path.abspath(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt1.csv')))
 df2_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt2.csv'))
 df3_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt3.csv'))
 df_chunk = pd.concat([df1_chunk, df2_chunk, df3_chunk], ignore_index=True)
