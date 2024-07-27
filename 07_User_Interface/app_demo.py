@@ -285,14 +285,7 @@ def load_csv(file_path):
 df_sentiment = load_csv('03_Sentiment_Analysis/Gemini/Prompt2/Prompt2_Sentiment_Analysis_Results.csv')
 print(df_sentiment.head(2))
 
-# Load Vector Chunk References #comment out for reduce memory usage
-# chunk_files = [
-#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt1.csv',
-#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt2.csv',
-#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt3.csv'
-# ]
-# df_chunks = [load_csv(file) for file in chunk_files]
-# df_chunk = pd.concat(df_chunks, ignore_index=True)
+
 
 # Load Vector Full Article References
 full_files = [
