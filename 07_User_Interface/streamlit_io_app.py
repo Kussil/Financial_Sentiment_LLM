@@ -12,6 +12,7 @@ import google.generativeai as genai
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
 from datetime import datetime, timedelta
+import platform
 
 # Model Definitions
 pc = Pinecone(api_key="bc4ea65c-d63e-48e4-9b65-53d6272d927d")
@@ -95,8 +96,13 @@ def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
     - fig (plotly.graph_objs.Figure): Plotly figure object containing the sentiment
                                       analysis bar chart.
     """
-    previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)]
-    
+    # previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)] # For Windows
+    # previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%-m/%-d/%Y') for i in range(0, num_days_back + 1)] # For Mac
+    if platform.system() == "Windows":
+        previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)]
+    else:
+        previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%-m/%-d/%Y') for i in range(0, num_days_back + 1)]
+
     sent_data = sentiment_data[(sentiment_data['Ticker'] == ticker)]
     sent_data = sent_data[sent_data['Date'].isin(previous_week_dates)]
     
@@ -277,15 +283,16 @@ def load_csv(file_path):
 
 # Load sentiment results
 df_sentiment = load_csv('03_Sentiment_Analysis/Gemini/Prompt2/Prompt2_Sentiment_Analysis_Results.csv')
+print(df_sentiment.head(2))
 
-# Load Vector Chunk References
-chunk_files = [
-    '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt1.csv',
-    '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt2.csv',
-    '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt3.csv'
-]
-df_chunks = [load_csv(file) for file in chunk_files]
-df_chunk = pd.concat(df_chunks, ignore_index=True)
+# Load Vector Chunk References #comment out for reduce memory usage
+# chunk_files = [
+#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt1.csv',
+#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt2.csv',
+#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt3.csv'
+# ]
+# df_chunks = [load_csv(file) for file in chunk_files]
+# df_chunk = pd.concat(df_chunks, ignore_index=True)
 
 # Load Vector Full Article References
 full_files = [

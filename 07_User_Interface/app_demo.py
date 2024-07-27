@@ -12,6 +12,7 @@ import google.generativeai as genai
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
 from datetime import datetime, timedelta
+import platform
 
 # Model Definitions
 pc = Pinecone(api_key="bc4ea65c-d63e-48e4-9b65-53d6272d927d")
@@ -95,8 +96,13 @@ def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
     - fig (plotly.graph_objs.Figure): Plotly figure object containing the sentiment
                                       analysis bar chart.
     """
-    previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)]
-    
+    # previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)] # For Windows
+    # previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%-m/%-d/%Y') for i in range(0, num_days_back + 1)] # For Mac
+    if platform.system() == "Windows":
+        previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)]
+    else:
+        previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%-m/%-d/%Y') for i in range(0, num_days_back + 1)]
+
     sent_data = sentiment_data[(sentiment_data['Ticker'] == ticker)]
     sent_data = sent_data[sent_data['Date'].isin(previous_week_dates)]
     
@@ -263,41 +269,52 @@ st.markdown("<h1 style='text-align: center;'>FAST OG: Stock Price Analyzer</h1>"
 #csv_path = os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv')
 #sec_df = pd.read_csv(csv_path)
 
+# Define the base directory relative to the current script location
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
+# Helper function to load CSV files
+def load_csv(file_path):
+    full_path = os.path.join(base_dir, file_path)
+    if os.path.exists(full_path):
+        return pd.read_csv(full_path)
+    else:
+        print(f"File does not exist: {full_path}")
+        return pd.DataFrame()
+
 # Load sentiment results
-df_sentiment = pd.read_csv(os.path.join(os.pardir,'03_Sentiment_Analysis', 'Gemini', 'Prompt2', 'Prompt2_Sentiment_Analysis_Results.csv'))
+df_sentiment = load_csv('03_Sentiment_Analysis/Gemini/Prompt2/Prompt2_Sentiment_Analysis_Results.csv')
+print(df_sentiment.head(2))
 
-
-# Load Vector Chunk References
-df1_chunk = pd.read_csv(os.path.abspath(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt1.csv')))
-df2_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt2.csv'))
-df3_chunk = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Chunk_References_pt3.csv'))
-df_chunk = pd.concat([df1_chunk, df2_chunk, df3_chunk], ignore_index=True)
+# Load Vector Chunk References #comment out for reduce memory usage
+# chunk_files = [
+#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt1.csv',
+#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt2.csv',
+#     '05_Create_Vector_DB/Gemini/Article_Chunk_References_pt3.csv'
+# ]
+# df_chunks = [load_csv(file) for file in chunk_files]
+# df_chunk = pd.concat(df_chunks, ignore_index=True)
 
 # Load Vector Full Article References
-df1_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt1.csv'))
-df2_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt2.csv'))
-df3_full = pd.read_csv(os.path.join(os.pardir, '05_Create_Vector_DB', 'Gemini', 'Article_Full_References_pt3.csv'))
-df_full = pd.concat([df1_full, df2_full, df3_full], ignore_index=True)
+full_files = [
+    '05_Create_Vector_DB/Gemini/Article_Full_References_pt1.csv',
+    '05_Create_Vector_DB/Gemini/Article_Full_References_pt2.csv',
+    '05_Create_Vector_DB/Gemini/Article_Full_References_pt3.csv'
+]
+df_full = pd.concat([load_csv(file) for file in full_files], ignore_index=True)
 df_full['Unique_ID'] = df_full['Chunk_ID'].apply(lambda x: '-'.join(x.split('-')[:2]))
-
-
-
-
-
 
 # Load Article Headline and URL References
 columns_to_load = ['Source', 'Unique_ID', 'Date', 'Article Headline', 'URL']
-invest_df1 = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Investment_Research_Part1.csv'), usecols=columns_to_load)
-invest_df2 = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Investment_Research_Part2.csv'), usecols=columns_to_load)
-proquest_df = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'ProQuest_Articles.csv'), usecols=columns_to_load)
-earnings_presentations = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Earnings_Presentations.csv'), usecols=columns_to_load)
-earnings_qa = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'Earnings_QA.csv'), usecols=columns_to_load)
-sec_df = pd.read_csv(os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv'), usecols=columns_to_load)
-articles_df = pd.concat([invest_df1, invest_df2, proquest_df, sec_df, earnings_presentations, earnings_qa], ignore_index=True)
-Define columns to load
-
-
-
+article_files = [
+    '02_Cleaned_Data/Investment_Research_Part1.csv',
+    '02_Cleaned_Data/Investment_Research_Part2.csv',
+    '02_Cleaned_Data/ProQuest_Articles.csv',
+    '02_Cleaned_Data/Earnings_Presentations.csv',
+    '02_Cleaned_Data/Earnings_QA.csv',
+    '02_Cleaned_Data/SEC_Filings.csv'
+]
+articles_dfs = [load_csv(file)[columns_to_load] for file in article_files]
+articles_df = pd.concat(articles_dfs, ignore_index=True)
 
 
 # Default tickers
@@ -369,7 +386,7 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
 
 
 # LLM Model setup.  (API Key needs to be in your environment variables)
-key = 'GOOGLE_API_KEY'
+key = 'AIzaSyC_hI1l9OTJhYoFw3UC-5LAfJXfENX9COs'
 GOOGLE_API_KEY = os.getenv(key)
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
