@@ -117,6 +117,9 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
 # Streamlit app layout
 st.markdown("<h1 style='text-align: center;'>FAST OG: Stock Price Analyzer</h1>", unsafe_allow_html=True)
 
+# Define the base directory relative to the current script location
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
 # Helper function to load CSV files
 @st.cache_data
 def load_csv(file_path):
