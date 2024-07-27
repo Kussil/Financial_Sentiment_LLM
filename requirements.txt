@@ -1,4 +1,5 @@
 streamlit
+pip install --upgrade streamlit
 streamlit-plotly-events
 yfinance
 plotly
