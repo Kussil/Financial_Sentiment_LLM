@@ -161,104 +161,80 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
 
     Returns:
         tuple: A tuple containing the generated response text and a list of article IDs from which text chunks were retrieved.
-    
-    Notes:
-    - The function first embeds the query using the `embedding_model`.
-    - If a date is provided, it generates a list of dates for the previous week to filter the search results.
-    - It queries the Pinecone vector database with the embedded query and the filters.
-    - The function retrieves and concatenates the relevant text chunks from the database.
-    - It then generates a response based on the retrieved context and the original query.
     """
-    # embed query
-    query_embeddings = embedding_model.encode(query)
+    try:
+        # Embed query
+        query_embeddings = embedding_model.encode(query)
+        print(f"Query Embeddings: {query_embeddings}")
 
-    # date filter for vector database
-    if date == None:
-        # If no date passed exclude date filter
-        filter={"ticker": {"$eq": ticker}}
-    elif date != None and up_down != None:
-        # translate up_down
-        if up_down == 'increase':
-            up_down_indicator = 1
+        # Date filter for vector database
+        if date is None:
+            filter = {"ticker": {"$eq": ticker}}
+        elif date and up_down:
+            up_down_indicator = 1 if up_down == 'increase' else 0
+            date_obj = date
+            previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(0, num_days_back + 1)]
+            filter = {
+                "ticker": {"$eq": ticker},
+                "date": {"$in": previous_week_dates},
+                "up_down_prediction": {"$eq": str(up_down_indicator)}
+            }
         else:
-            up_down_indicator = 0
+            date_obj = date
+            previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(0, num_days_back + 1)]
+            filter = {
+                "ticker": {"$eq": ticker},
+                "date": {"$in": previous_week_dates}
+            }
+        print(f"Filter: {filter}")
 
-        # Convert the string to a datetime object
-        date_obj = date#datetime.strptime(date, '%Y-%m-%d')
+        # Run vector database query
+        index = pc.Index(pinecone_index)
+        output = index.query(
+            namespace="ns1",
+            vector=[float(i) for i in list(query_embeddings)],
+            filter=filter,
+            top_k=top_results,
+            include_values=False,
+            include_metadata=True
+        )
+        print(f"Query Output: {output['matches']}")
 
-        # Generate the list of dates for the previous week
-        previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(0, num_days_back + 1)]
-        print(previous_week_dates)
-        
-        # Create Filter
-        filter={
-            "ticker": {"$eq": ticker},
-            "date": {"$in": previous_week_dates},
-            "up_down_prediction": {"$eq": str(up_down_indicator)}
-        }
-    else:
-        # Convert the string to a datetime object
-        date_obj = date#datetime.strptime(date, '%Y-%m-%d')
+        # Process results
+        article_ids = []
+        retrieved_text = ' '
+        for match in output['matches']:
+            Chunk_UID = match['id']
+            chunk_text = df_chunk[df_chunk['Chunk_ID'] == Chunk_UID]['Text Chunks'].values[0]
+            print(f"Chunk Text: {chunk_text}")
+            article_ids.append('-'.join(Chunk_UID.split('-')[:2]))
+            retrieved_text += ' ' + chunk_text
+        print(f"Article IDs: {article_ids}")
+        print(f"Retrieved Text: {retrieved_text}")
 
-        # Generate the list of dates for the previous week
-        previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(0, num_days_back + 1)]
-        print(previous_week_dates)
-        
-        # Create Filter
-        filter={
-            "ticker": {"$eq": ticker},
-            "date": {"$in": previous_week_dates}
-        }
+        # Generate response
+        query_context = f"""
+            Given the text from a financial news article, analyze the content and produce a bulleted response to the provided query:
+            **Constraints:** ONLY RESPOND USING THE PROVIDED Context
+            The context from the financial news article excerpts below:
+            {retrieved_text}
+            Query:
+            {query}
+            Example Response:
+            - **subject**: explanation
+            - **subject**: explanation
+            - **subject**: explanation
+        """
+        print(f"Query Context: {query_context}")
 
-    # Run vector database query
-    index = pc.Index(pinecone_index)
+        response = model.generate_content(query_context)
+        print(f"Generated Response: {response.text}")
+        return response.text, article_ids
 
-    output = index.query(
-        namespace="ns1",
-        vector=[float(i) for i in list(query_embeddings)],
-        filter=filter,
-        top_k=top_results,
-        include_values=False,
-        include_metadata=True
-    )
-    print(output['matches'])
-    
-    article_ids = []
-    retrieved_text = ' '
-    for i in range(len(output['matches'])):
-        Chunk_UID = output['matches'][i]['id']
-        chunk_text = df_chunk[df_chunk['Chunk_ID']==Chunk_UID]['Text Chunks'].values[0]
-        print('#########################################')
-        print(chunk_text)
-        article_ids.append('-'.join(Chunk_UID.split('-')[:2]))
-        retrieved_text += ' ' + chunk_text
-    
-    print(article_ids)
-    # Prompt and response function
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None, []
 
-    query_context = f" \
-        Given the text from a financial news article, analyze the content and produce a bulleted response to the provided query: \
-        \
-        **Constraints:** ONLY RESPOND USING THE PROVIDED Context \
-        \
-        The context from the financial news article excerpts below: \
-        {retrieved_text} \
-        \
-        Query: \
-        {query} \
-        \
-        Example Response: \
-        - **subject**: explanation \
-        - **subject**: explanation \
-        - **subject**: explanation \
-        "
-        
-    print('#####################################################################################')
-    print('##############################    RESPONSE   ########################################')
-    print('#####################################################################################')
-
-    response = model.generate_content(query_context)
-    return response.text, article_ids
 
 
 # Streamlit app layout
@@ -381,8 +357,11 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
 # LLM Model setup.  (API Key needs to be in your environment variables)
 key = 'AIzaSyC_hI1l9OTJhYoFw3UC-5LAfJXfENX9COs'
 GOOGLE_API_KEY = os.getenv(key)
+print(f"Google API Key: {GOOGLE_API_KEY}")
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
+print("Successfully connected to Google Generative AI with key.")
+
 
        
 # Query input and response
