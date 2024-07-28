@@ -96,8 +96,7 @@ def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
     - fig (plotly.graph_objs.Figure): Plotly figure object containing the sentiment
                                       analysis bar chart.
     """
-    # previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)] # For Windows
-    # previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%-m/%-d/%Y') for i in range(0, num_days_back + 1)] # For Mac
+    
     if platform.system() == "Windows":
         previous_week_dates = [(date_obj - timedelta(days=i)).strftime('%#m/%#d/%Y') for i in range(0, num_days_back + 1)]
     else:
