@@ -38,6 +38,8 @@ def fetch_data(ticker, start, end):
     return stock_data
 
 # Function to plot stock data
+
+
 def plot_data(stock_data, ticker):
     """
     Plot stock data for a given ticker.
@@ -48,12 +50,12 @@ def plot_data(stock_data, ticker):
 
     Returns:
     plotly.graph_objs._figure.Figure: Plotly figure object with the stock price plot.
-    """ 
+    """
     min_date = stock_data.index.min().to_pydatetime()
     max_date = stock_data.index.max().to_pydatetime()
 
     date_range = st.slider("Select Graph Date Range", min_value=min_date, max_value=max_date, value=(min_date, max_date))
-    filtered_data = stock_data.loc[date_range[0]:date_range[1]]  
+    filtered_data = stock_data.loc[date_range[0]:date_range[1]]
 
     fig = px.line(filtered_data, 
                   x=filtered_data.index, 
@@ -63,22 +65,28 @@ def plot_data(stock_data, ticker):
                       xaxis_title='Date',
                       yaxis_title='Stock Price (USD)')
     fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}<br>Change: %{customdata:.2f}%')
-    fig.for_each_trace(lambda trace: trace.update(customdata=filtered_data['Change'].values*100))
+    fig.for_each_trace(lambda trace: trace.update(customdata=filtered_data['Change'].values * 100))
+
     try:
         selected_points = plotly_events(fig)
         graph_date = selected_points[0]['x']
-        print(graph_date)
         date_object = datetime.strptime(graph_date, "%Y-%m-%d")
-        st.session_state.stock_change = filtered_data['Change'].loc[graph_date]
-            
-    except:
-        date_object = end_date
-        graph_date = '2024-05-13'
-        st.session_state.stock_change = filtered_data['Change'].loc[graph_date]
+        if graph_date in filtered_data.index:
+            st.session_state.stock_change = filtered_data['Change'].loc[graph_date]
+        else:
+            nearest_date = filtered_data.index.get_loc(graph_date, method='nearest')
+            nearest_date_str = filtered_data.index[nearest_date].strftime("%Y-%m-%d")
+            st.session_state.stock_change = filtered_data['Change'].loc[nearest_date_str]
+            date_object = filtered_data.index[nearest_date]
+    except Exception as e:
+        #st.error(f"An error occurred: {e}")
+        default_date = filtered_data.index[-1]  # Use the last date in filtered_data as the default
+        date_object = default_date
+        st.session_state.stock_change = filtered_data['Change'].loc[default_date]
     
-    # set date_object to trigger query
     st.session_state.date_object = date_object
     return fig, date_object
+
 
 def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
     """
@@ -330,7 +338,7 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
                 up_down = 'increase'
             else:
                 up_down = 'decrease'
-            st.write(f'Daily stock price change on {selected_date}: **{abs(st.session_state.stock_change):.0%} {up_down}**')
+            st.write(f'Daily stock price change on {selected_date}: **{abs(st.session_state.stock_change):.2%} {up_down}**')
         except:
             pass
         
