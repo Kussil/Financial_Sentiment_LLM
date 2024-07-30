@@ -1,6 +1,6 @@
 # 06_Query_Vector_DB Folder
 
-This folder contains notebooks to query the vector databases created from the FinBERT and Gemini sentements and embedding. 
+This folder contains notebooks to query the vector databases created from the FinBERT and Gemini sentiments and embedding. 
 
 ## Directory Contents
 

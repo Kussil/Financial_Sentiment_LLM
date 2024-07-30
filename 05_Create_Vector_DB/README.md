@@ -1,6 +1,6 @@
 # 05_Create_Vector_DB Folder
 
-This folder contains notebooks to process the sentiments from FinBERT and Gemini to embed text of each article as vectors with associated date, ticker, and sentiment meta data.
+This folder contains notebooks to process the sentiments from FinBERT and Gemini, and to embed text of each article as vectors with associated date, ticker, and sentiment meta data.
 
 ## Directory Contents
 
