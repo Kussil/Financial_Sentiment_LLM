@@ -101,9 +101,9 @@ deactivate
 ### 5. Obtain API Keys
 All our notebooks are designed to run in Colab unless otherwise specified.  Notebooks in the 01_Raw_Data folder and the script in the 07_User_Interface folder are the primary exceptions.  While other folders may contain notebooks designed to run on a desktop, they will always have a Colab alternative.  The API keys below need to be input into the Colab secrets tab and also updated in the script in the 07_User_Interface folder.
 
-1. **Gemini API key** - Obtain a key to access the Gemini API. Follow the instructions [here](https://www.gemini.com/cryptopedia/api).
-2. **Hugging Face API key** - Obtain a key to access Hugging Face models. Follow the instructions [here](https://huggingface.co/docs/api-inference/quicktour#getting-started).
-3. **GitHub API key** - Obtain a key to access GitHub API. Follow the instructions [here](https://docs.github.com/en/rest/overview/other-authentication-methods#personal-access-tokens).
+1. **Gemini API key** - Follow the instructions [here](https://www.gemini.com/cryptopedia/api).
+2. **Hugging Face API key** - Follow the instructions [here](https://huggingface.co/docs/api-inference/quicktour#getting-started).
+3. **GitHub API key** - Follow the instructions [here](https://docs.github.com/en/rest/overview/other-authentication-methods#personal-access-tokens).
 
 # Table of Contents
 

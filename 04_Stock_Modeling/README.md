@@ -12,6 +12,6 @@ This directory contains files and notebooks related to stock modeling. The purpo
     
     Contains notebooks for stock modeling based on a flat, or unaggregated dataset.  In this dataset, each article is its own datapoint.
 	
-- [Stock Modeling Results](Stock Modeling Results.xlsx)
+- Stock Modeling Results
     
     Contains the results of our stock modeling experiments
