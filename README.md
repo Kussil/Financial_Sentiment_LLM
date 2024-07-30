@@ -45,7 +45,7 @@ The project is organized into the following folders:
 - `07_User_Interface`: Script to run our streamlit app. 
 - `08_Presentations`: Presentations and related materials.
 - `09_Miscellaneous`: Miscellaneous files, including the project logo, references etc.
-- `10_Source_Code`: Miscellaneous files, including the project logo, references etc.
+- `10_Source_Code`: Files with helper functions
 
 ## Setting Up the Project
 
