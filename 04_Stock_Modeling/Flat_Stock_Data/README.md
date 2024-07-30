@@ -1,6 +1,6 @@
 # Flat_Stock_Data
 
-This folder contains scripts and models for flat stock data modeling. Note that 02_Prompt2_Gemini_Random_Forest_LabelEncoding.ipynb is the final notebook used to create the output csv used in our app.
+This folder contains notebooks for our stock models using a flat, or unaggregated dataset. (Each article is its own datapoint.) Note that 02_Prompt2_Gemini_Random_Forest_LabelEncoding.ipynb is the final notebook used to create the output csv used in our app.
 
 ## Contents
 

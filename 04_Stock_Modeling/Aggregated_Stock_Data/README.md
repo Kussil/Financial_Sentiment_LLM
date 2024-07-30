@@ -1,6 +1,6 @@
 # Aggregated_Stock_Data
 
-This folder contains working notebooks for data aggregation and preliminary analysis.
+This folder contains notebooks for our stock models using an aggreagated dataset. (If a date has multiple articles, they are combined together into a single datapoint.)
 
 ## Contents
 
