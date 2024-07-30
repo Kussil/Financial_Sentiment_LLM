@@ -1,7 +1,6 @@
 # Financial Analysis Sentiment Tool
 ![Logo](09_Miscellaneous/logo_3.png)
 
-
 ## Table of Contents
 1. [Description](#description)
 2. [Demo](#demo)
@@ -9,15 +8,8 @@
 4. [Project Structure](#project-structure)
 5. [Installation Guidance](#setting-up-the-project)
 
-
 ## Description
-This project aims to analyze the dynamics of stock prices for around 20 industry-related competitors, such as Chevron, Exxon, and Shell. The analysis is based on various factors, including news sentiment, financial reports, and other documents. The project combines fundamental and technical analysis methodologies to predict stock price movements and understand market behavior.
-
-The specific goals include:
-- Developing a News Sentiment Analysis Tool: Analyzing sentiment from news articles, financial reports, and extensive documents.
-- Determining Feature Importance to Predict Stock Price Movement: Identifying key factors that significantly influence stock price movements.
-- Explaining Stock Price Movements Using News Articles: Finding relevant documents and references explaining stock price movements.
-- Delivering a Comprehensive Analysis Report: Producing detailed reports summarizing the findings.
+This project aims to develop a News Sentiment Analysis Tool for analyzing sentiment from news articles, financial reports, and extensive documents related to the selected oil companies. Another key objective is to determine feature importance to predict stock price movement by identifying key factors that significantly influence stock price movements in the oil industry. Additionally, the project seeks to explain stock price movements using news articles by finding relevant documents and references that elucidate observed stock price fluctuations.
 
 ## Demo
 Here’s a quick demo of the Financial Analysis Sentiment Tool in action:
@@ -40,20 +32,20 @@ To run the demo using Streamlit, follow these steps:
 - **Stock Price Movement Summaries**: Generates summaries based on news and financial reports, explaining stock price movements and providing relevant references.
 - **Google Colab Integration**: Allows easy access and collaboration through Google Colab, enabling users to run notebooks and access files directly from GitHub.
 
-
 ## Project Structure
 The project is organized into the following folders:
 
-- `00_Temp`: Temporary files and data.
-- `01_Raw_Data`: Raw data collected for analysis.
-- `02_Cleaned_Data`: Cleaned and processed data.
-- `03_Sentiment_Analysis`: Scripts and notebooks for sentiment analysis.
-- `04_Stock_Modeling`: Stock modeling and prediction scripts.
-- `05_Create_Vector_DB`: Scripts to create vector databases.
-- `06_Query_Vector_DB`: Querying the vector databases.
-- `07_User_Interface`: User interface components. 
+- `00_Temp`: Temporary working files not critical to the main repository.
+- `01_Raw_Data`: Data scraping notebooks and resulting raw data files.
+- `02_Cleaned_Data`: Cleaning notebook and cleaned and processed data.
+- `03_Sentiment_Analysis`: Files and notebooks for sentiment analysis.
+- `04_Stock_Modeling`: Stock modeling notebooks.
+- `05_Create_Vector_DB`: Notebooks to create vector our database.
+- `06_Query_Vector_DB`: Notebook to test querying the vector database.
+- `07_User_Interface`: Script to run our streamlit app. 
 - `08_Presentations`: Presentations and related materials.
 - `09_Miscellaneous`: Miscellaneous files, including the project logo, references etc.
+- `10_Source_Code`: Miscellaneous files, including the project logo, references etc.
 
 ## Setting Up the Project
 
@@ -105,6 +97,13 @@ When you're done working, you can deactivate the virtual environment with:
 ```bash
 deactivate
 ```
+
+### 5. Obtain API Keys
+All our notebooks are designed to run in Colab unless otherwise specified.  Notebooks in the 01_Raw_Data folder and the script in the 07_User_Interface folder are the primary exceptions.  While other folders may contain notebooks designed to run on a desktop, they will always have a Colab alternative.  The API keys below need to be input into the Colab secrets tab and also updated in the script in the 07_User_Interface folder.
+
+1. **Gemini API key** - Obtain a key to access the Gemini API. Follow the instructions [here](https://www.gemini.com/cryptopedia/api).
+2. **Hugging Face API key** - Obtain a key to access Hugging Face models. Follow the instructions [here](https://huggingface.co/docs/api-inference/quicktour#getting-started).
+3. **GitHub API key** - Obtain a key to access GitHub API. Follow the instructions [here](https://docs.github.com/en/rest/overview/other-authentication-methods#personal-access-tokens).
 
 # Table of Contents
 
