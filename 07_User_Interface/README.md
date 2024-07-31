@@ -4,6 +4,9 @@ This folder contains scripts to implement our Retreival Augmented Generation (RA
 
 ## Directory Contents
 - **app_demo.py**
+- **streamlit_io_app.py**
+
+The app_demo.py is the locally run app which can be launch via your local terminal. The streamlit_io_app.py is the versions of the app that has been loaded to the Azure environment.
 
 ## Running the Application
 To run the Streamlit application, execute the following command in your terminal:
