@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import pandas as pd
 import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import google.generativeai as genai
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
@@ -64,7 +65,7 @@ def plot_data(stock_data, ticker):
     fig.update_layout(title=f'Stock Prices for {ticker}',
                       xaxis_title='Date',
                       yaxis_title='Stock Price (USD)')
-    fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}<br>Change: %{customdata:.2f}%')
+    fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}<br>Change: %{customdata:.2f}%', line_color='#0A509E')
     fig.for_each_trace(lambda trace: trace.update(customdata=filtered_data['Change'].values * 100))
 
     try:
@@ -146,7 +147,7 @@ def plot_sentiment(sentiment_data, ticker, date_obj, num_days_back):
                          'yanchor': 'top'})  # Position title slightly above the plot
     
     # Update the x-axis to show integer ticks only
-    fig.update_xaxes(tickmode='array', tickvals=list(range(0, len(summary))))
+    fig.update_xaxes(tickmode='array', tickvals=list(range(0, len(sent_data) + 1)))
 
       
     
@@ -246,8 +247,8 @@ def ask_vector_query(query, top_results, ticker, date, pinecone_index, num_days_
 
 
 # Streamlit app layout
-st.markdown("<h1 style='text-align: center;'>FAST OG: Stock Price Analyzer</h1>", unsafe_allow_html=True)
-
+st.markdown("<h1 style='text-align: center;'>FAST OG</h1>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center;'>Financial Analysis Sentiment Tool for Oil & Gas</h3>", unsafe_allow_html=True)
 # Load CSV into a DataFrame
 #csv_path = os.path.join(os.pardir, '02_Cleaned_Data', 'SEC_Filings.csv')
 #sec_df = pd.read_csv(csv_path)
@@ -404,7 +405,7 @@ try:
                 #st.write(f"Source: {row['Source']}, Article Headline: {row['Article Headline']}, Date: {row['Date']}, Article ID: {row['Unique_ID']}")
                 if st.checkbox(f"Show text for: Source: {row['Source']}, Article Headline: {row['Article Headline']}, Date: {row['Date']}, Article ID: {row['Unique_ID']}", key=row['Unique_ID']):
                     with st.container(height=300):
-                        st.markdown(df_full[df_full['Unique_ID'] == row['Unique_ID']]['Text Chunks'].iloc[0])
+                        st.markdown(df_full[df_full['Unique_ID'] == row['Unique_ID']]['Text Chunks'].iloc[0].replace('$','\$'))
         except:
             pass
 
