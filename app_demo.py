@@ -61,12 +61,14 @@ def plot_data(stock_data, ticker):
     fig = px.line(filtered_data, 
                   x=filtered_data.index, 
                   y='Close', 
-                  title=f'Stock Prices for {ticker}')
-    fig.update_layout(title=f'Stock Prices for {ticker}',
+                  title=f'Stock Price for {ticker}')
+    fig.update_layout(title=f'Stock Price for {ticker}',
                       xaxis_title='Date',
                       yaxis_title='Stock Price (USD)')
     fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}<br>Change: %{customdata:.2f}%', line_color='#0A509E')
     fig.for_each_trace(lambda trace: trace.update(customdata=filtered_data['Change'].values * 100))
+    
+    
 
     try:
         selected_points = plotly_events(fig)
