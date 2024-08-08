@@ -65,7 +65,7 @@ def plot_data(stock_data, ticker):
     fig.update_layout(title=f'Stock Price for {ticker}',
                       xaxis_title='Date',
                       yaxis_title='Stock Price (USD)')
-    fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}<br>Change: %{customdata:.2f}%', line_color='#0A509E')
+    fig.update_traces(hovertemplate='Date: %{x|%Y-%m-%d}<br>Value: %{y}<br>Change: %{customdata:.2f}%', line_color='#0A509E', line_width=4)
     fig.for_each_trace(lambda trace: trace.update(customdata=filtered_data['Change'].values * 100))
     
     
@@ -335,28 +335,27 @@ if st.session_state.plot_shown and st.session_state.selected_ticker:
 
         # Add a date selector for the article        
         selected_date = st.date_input('Choose date from graph or select a date within the range', date_object, key='selected_date')
-        
-        try:
-            if st.session_state.stock_change > 0:
-                up_down = 'increase'
-            else:
-                up_down = 'decrease'
-            st.write(f'Daily stock price change on {selected_date}: **{abs(st.session_state.stock_change):.2%} {up_down}**')
+        try: 
+            st.session_state.stock_change = data['Change'].loc[selected_date.strftime('%Y-%m-%d')]
+            try: 
+                if st.session_state.stock_change > 0:
+                    up_down = 'increase'
+                else:
+                    up_down = 'decrease'
+                st.write(f'Daily stock price change on {selected_date}: **{abs(st.session_state.stock_change):.2%} {up_down}**')
+            except:
+                pass
         except:
-            pass
-        
+            st.write('No stock price data available for selected date, pick a different data')
+
+
         st.divider()
         
         try:
             st.markdown("<h2 style='text-align: center;'>Sentiment Counts for Last Week of Articles</h2>", unsafe_allow_html=True)
 
             num_days_back = 7
-            # Slider for select top number of vector results, used for sensitivit testing
-            #num_days_back = st.select_slider("Select Number of Days Back to Use", 
-            #                                        options = list(range(0,15)),
-            #                                        value = 7,
-            #                                        key='num_days')
-        
+            
             # Draw Sentiment Plot
             fig_sent = plot_sentiment(df_sentiment, st.session_state.selected_ticker, selected_date, num_days_back)   
             st.plotly_chart(fig_sent)
@@ -436,7 +435,7 @@ if st.session_state.response_vector:
     #                                            key='ask_chunk')
     if st.button('Ask Question') and ask_query:
         ask_response, ask_article_ids = ask_vector_query(ask_query, selected_ask_chunk_count, ticker, ask_selected_date, "fastfullvectors", num_days_back, df_full, None)
-        st.session_state.ask_response = ask_response
+        st.session_state.ask_response = ask_response.replace('$','\$')
     try:
         st.write('Response:')
         st.write(st.session_state.ask_response)
